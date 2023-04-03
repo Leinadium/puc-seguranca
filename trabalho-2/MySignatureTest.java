@@ -3,12 +3,13 @@
  *  Luiz Fellipe Augusto - 1711256
  */
 
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-//
-// este exemplo utililiza facilidades para a geracao e verificacao
-// de assinatura digital
+
+
 public class MySignatureTest {
 
+    /** Converte um array de butes para String */
     private static String toHex(byte[] meusBytes) {
         // converte o signature para hexadecimal
         StringBuilder buf = new StringBuilder();
@@ -27,11 +28,10 @@ public class MySignatureTest {
         // argumentos
         String padraoAssinatura = args[0];
         String[] algoritmos = padraoAssinatura.split("with");
-        byte[] documento = args[0].getBytes("UTF8");
+        byte[] documento = args[0].getBytes(StandardCharsets.UTF_8);
 
         // gerando as chaves
         // poderia usar RSA direto pois todas as opcoes do MySignature utilizando RSA
-
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algoritmos[1]);
         keyGen.initialize(2048);
 

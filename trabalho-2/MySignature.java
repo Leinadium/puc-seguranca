@@ -9,9 +9,6 @@ import java.util.Objects;
 import javax.crypto.*;
 
 public class MySignature {
-    // algoritmo de hash
-    // chave privada
-    // chave publica
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
@@ -70,20 +67,20 @@ public class MySignature {
     }
 
     public byte[] sign() throws Exception {
-        // fiz o hash
+        // faz o hash
         byte[] digest = this.messageDigest.digest(this.document);
 
         // passando pela chave privada
         this.cipher.init(Cipher.ENCRYPT_MODE, this.privateKey);
         byte[] cifrado = this.cipher.doFinal(digest);
 
+        // remove o documento (de acordo com a descricao do metodo original do sign)
         this.document = null;
         return cifrado;
     }
 
     public void initVerify(PublicKey pk) {
         this.publicKey = pk;
-        return;
     }
 
     public boolean verify(byte[] assinatura) throws Exception {
