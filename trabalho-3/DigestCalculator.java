@@ -12,9 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
@@ -86,10 +84,30 @@ public class DigestCalculator {
                 statusArquivos.put(digestsEncontrados.get(dig), "COLISION");
             } else {
                 // verifica se esse arquivo esta presente no arquivo xml
-                if (this.arquivo.entries.contains)
+                if (this.arquivo.entries.containsKey(filename)) {
+                    // verificando se eu tenho o digest para o meu tipo de digest
+                    HashMap<String, String> digestsDisponiveis = this.arquivo.entries.get(dig);
+                    if (digestsDisponiveis.containsKey(tipoDigest)) {
+                        // comparando digests
+                        if (Objects.equals(dig, digestsDisponiveis.get(tipoDigest))) {
+                            statusArquivos.put(filename, "OK");
+                        } else {
+                            statusArquivos.put(filename, "NOT_OK");
+                        }
+                    }
+                } else {
+                    statusArquivos.put(filename, "NOT_FOUND");
+                }
+
+                // atualizando digestsEncontrados
+                digestsEncontrados.put(dig, filename);
             }
         }
 
+        // Exibindo status dos arquivos
+        for (String filename : statusArquivos.keySet()) {
+            System.out.println(filename + " " + tipoDigest + " " + statusArquivos.get(filename));
+        }
 
         return 0;
     }
