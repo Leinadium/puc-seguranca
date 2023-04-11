@@ -80,13 +80,13 @@ public class DigestCalculator {
             if (digestsEncontrados.containsKey(dig)) {
                 // marco como colisao
                 statusArquivos.put(filename, "COLISION");
-                // atualizo o status do arquivo que ja tinha o mesmo digest
+                // atualiza o status do arquivo que ja tinha o mesmo digest
                 statusArquivos.put(digestsEncontrados.get(dig), "COLISION");
             } else {
                 // verifica se esse arquivo esta presente no arquivo xml
                 if (this.arquivo.entries.containsKey(filename)) {
                     // verificando se eu tenho o digest para o meu tipo de digest
-                    HashMap<String, String> digestsDisponiveis = this.arquivo.entries.get(dig);
+                    HashMap<String, String> digestsDisponiveis = this.arquivo.entries.get(filename);
                     if (digestsDisponiveis.containsKey(tipoDigest)) {
                         // comparando digests
                         if (Objects.equals(dig, digestsDisponiveis.get(tipoDigest))) {
@@ -144,7 +144,7 @@ class Pasta {
                 // fazendo por batch
                 try (InputStream is = new FileInputStream(path.toString())) {
                     byte[] buffer = new byte[8192];
-                    int read = 0;
+                    int read;
                     while ((read = is.read(buffer)) > 0) {
                         md.update(buffer, 0, read);
                     }
