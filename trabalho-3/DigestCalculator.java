@@ -79,9 +79,9 @@ public class DigestCalculator {
             String dig = this.pasta.digests.get(filename);
             if (digestsEncontrados.containsKey(dig)) {
                 // marco como colisao
-                statusArquivos.put(filename, "COLISION");
+                statusArquivos.put(filename, dig + " COLISION");
                 // atualiza o status do arquivo que ja tinha o mesmo digest
-                statusArquivos.put(digestsEncontrados.get(dig), "COLISION");
+                statusArquivos.put(digestsEncontrados.get(dig), dig + " COLISION");
             } else {
                 // verifica se esse arquivo esta presente no arquivo xml
                 if (this.arquivo.entries.containsKey(filename)) {
@@ -90,13 +90,15 @@ public class DigestCalculator {
                     if (digestsDisponiveis.containsKey(tipoDigest)) {
                         // comparando digests
                         if (Objects.equals(dig, digestsDisponiveis.get(tipoDigest))) {
-                            statusArquivos.put(filename, "OK");
+                            statusArquivos.put(filename, dig + " OK");
                         } else {
-                            statusArquivos.put(filename, "NOT_OK");
+                            statusArquivos.put(filename, dig + " NOT_OK");
                         }
+                    } else {
+                        statusArquivos.put(filename, dig + " NOT_FOUND");
                     }
                 } else {
-                    statusArquivos.put(filename, "NOT_FOUND");
+                    statusArquivos.put(filename, dig + " NOT_FOUND");
                 }
 
                 // atualizando digestsEncontrados
