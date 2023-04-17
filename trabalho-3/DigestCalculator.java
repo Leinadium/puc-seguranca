@@ -78,6 +78,8 @@ public class DigestCalculator {
         HashMap<String, String> statusArquivos = new HashMap<>();
         // hashmap para armazenar os hashes encontrados e seus respectivos filenames
         HashMap<String, String> digestsEncontrados = new HashMap<>();
+        // hashmap para armazenar os novos hashes encontrados
+        HashMap<String, String> novosDigests = new HashMap<>();
 
         // iterando sobre todos os arquivos da pasta
         for (String filename : this.pasta.digests.keySet()) {
@@ -87,7 +89,11 @@ public class DigestCalculator {
                 // marco como colisao
                 statusArquivos.put(filename, dig + " COLISION");
                 // atualiza o status do arquivo que ja tinha o mesmo digest
-                statusArquivos.put(digestsEncontrados.get(dig), dig + " COLISION");
+                String filenameColisao = digestsEncontrados.get(dig);
+                statusArquivos.put(filenameColisao, dig + " COLISION");
+                // se este arquivo ja foi adicionado como novoDigest, remove (para nao inserir no xml)
+                novosDigests.remove(filenameColisao);
+
             } else {
                 // verifica se esse arquivo esta presente no arquivo xml
                 if (this.arquivo.entries.containsKey(filename)) {
@@ -102,15 +108,11 @@ public class DigestCalculator {
                         }
                     } else {
                         statusArquivos.put(filename, dig + " NOT_FOUND");
-                        // atualizando o arquivo
-                        digestsDisponiveis.put(tipoDigest, dig);
+                        novosDigests.put(filename, dig);    // atualizando o arquivo
                     }
                 } else {
                     statusArquivos.put(filename, dig + " NOT_FOUND");
-                    // atualizando o arquivo
-                    HashMap<String, String> newDigestsDisponiveis = new HashMap<>();
-                    newDigestsDisponiveis.put(tipoDigest, dig);
-                    this.arquivo.entries.put(filename, newDigestsDisponiveis);
+                    novosDigests.put(filename, dig);    // atualizando o arquivo
                 }
 
                 // atualizando digestsEncontrados
@@ -125,6 +127,11 @@ public class DigestCalculator {
 
         // atualizando o arquivo
         try {
+            for (String filename : novosDigests.keySet()) {
+                this.arquivo.adicionaEntry(filename, tipoDigest, novosDigests.get(filename));
+            }
+
+
             this.arquivo.atualizar();
         } catch (Exception e) {
             System.err.println("Erro ao atualizar o arquivo XML " + caminhoArqListaDigest + ": " + e.getMessage());
@@ -227,6 +234,19 @@ class Arquivo {
             this.entries.put(nomeArquivo, novoEntry);
         }
     }
+
+    /**
+     * Adiciona um novo entry no arquivo XML
+     */
+    public void adicionaEntry(String filename, String tipoDigest, String hexDigest) {
+        // se o arquivo nao existir, cria um novo entry
+        if (!this.entries.containsKey(filename)) {
+            this.entries.put(filename, new HashMap<>());
+        }
+        // adiciona o novo digest
+        this.entries.get(filename).put(tipoDigest, hexDigest);
+    }
+
 
     /**
      * Atualiza o arquivo XML com os digests encontrados na pasta
