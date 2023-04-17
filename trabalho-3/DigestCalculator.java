@@ -4,7 +4,7 @@
  */
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -15,6 +15,12 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.w3c.dom.*;
 
 public class DigestCalculator {
@@ -96,9 +102,15 @@ public class DigestCalculator {
                         }
                     } else {
                         statusArquivos.put(filename, dig + " NOT_FOUND");
+                        // atualizando o arquivo
+                        digestsDisponiveis.put(tipoDigest, dig);
                     }
                 } else {
                     statusArquivos.put(filename, dig + " NOT_FOUND");
+                    // atualizando o arquivo
+                    HashMap<String, String> newDigestsDisponiveis = new HashMap<>();
+                    newDigestsDisponiveis.put(tipoDigest, dig);
+                    this.arquivo.entries.put(filename, newDigestsDisponiveis);
                 }
 
                 // atualizando digestsEncontrados
@@ -109,6 +121,14 @@ public class DigestCalculator {
         // Exibindo status dos arquivos
         for (String filename : statusArquivos.keySet()) {
             System.out.println(filename + " " + tipoDigest + " " + statusArquivos.get(filename));
+        }
+
+        // atualizando o arquivo
+        try {
+            this.arquivo.atualizar();
+        } catch (Exception e) {
+            System.err.println("Erro ao atualizar o arquivo XML " + caminhoArqListaDigest + ": " + e.getMessage());
+            return 1;
         }
 
         return 0;
@@ -144,7 +164,7 @@ class Pasta {
                 String filename = path.getFileName().toString();
                 // fazendo o digest do arquivo
                 // fazendo por batch
-                try (InputStream is = new FileInputStream(path.toString())) {
+                try (InputStream is = Files.newInputStream(path)) {
                     byte[] buffer = new byte[8192];
                     int read;
                     while ((read = is.read(buffer)) > 0) {
@@ -205,6 +225,60 @@ class Arquivo {
             }
             // adiciona o entry no hashmap
             this.entries.put(nomeArquivo, novoEntry);
+        }
+    }
+
+    /**
+     * Atualiza o arquivo XML com os digests encontrados na pasta
+     */
+    public void atualizar() throws Exception {
+        // https://mkyong.com/java/how-to-create-xml-file-in-java-dom/
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.newDocument();
+
+        // criando a tag raiz
+        Element catalog = doc.createElement("CATALOG");
+        doc.appendChild(catalog);
+
+        // iterando sobre cada file entry
+        for (String filename : this.entries.keySet()) {
+            // criando a tag FILE_ENTRY
+            Element fileEntry = doc.createElement("FILE_ENTRY");
+            catalog.appendChild(fileEntry);
+
+            // criando a tag FILE_NAME
+            Element fileName = doc.createElement("FILE_NAME");
+            fileName.appendChild(doc.createTextNode(filename));
+            fileEntry.appendChild(fileName);
+
+            // criando as tags DIGEST_ENTRY
+            HashMap<String, String> digests = this.entries.get(filename);
+            for (String tipoDigest : digests.keySet()) {
+                // criando a tag DIGEST_ENTRY
+                Element digestEntry = doc.createElement("DIGEST_ENTRY");
+                fileEntry.appendChild(digestEntry);
+
+                // criando a tag DIGEST_TYPE
+                Element digestType = doc.createElement("DIGEST_TYPE");
+                digestType.appendChild(doc.createTextNode(tipoDigest));
+                digestEntry.appendChild(digestType);
+
+                // criando a tag DIGEST_HEX
+                Element digestHex = doc.createElement("DIGEST_HEX");
+                digestHex.appendChild(doc.createTextNode(digests.get(tipoDigest)));
+                digestEntry.appendChild(digestHex);
+            }
+        }
+
+        // escrevendo o arquivo XML
+        try (FileOutputStream output = new FileOutputStream(this.caminho)) {
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");    // pretty print
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(output);
+            transformer.transform(source, result);
         }
     }
 }
