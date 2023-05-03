@@ -1,13 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <CATALOG>
+    <FILE_ENTRY>
+        <FILE_NAME>dede.txt</FILE_NAME>
+        <DIGEST_ENTRY>
+            <DIGEST_TYPE>SHA1</DIGEST_TYPE>
+            <DIGEST_HEX>db4a6d4c2455229ac71d18f130b93cf5bc824a06</DIGEST_HEX>
+        </DIGEST_ENTRY>
+    </FILE_ENTRY>
+    <FILE_ENTRY>
+        <FILE_NAME>isabella.txt</FILE_NAME>
+        <DIGEST_ENTRY>
+            <DIGEST_TYPE>MD5</DIGEST_TYPE>
+            <DIGEST_HEX>c5c5903b6083238c145616ba59da68e5</DIGEST_HEX>
+        </DIGEST_ENTRY>
+    </FILE_ENTRY>
+    <FILE_ENTRY>
+        <FILE_NAME>marib.txt</FILE_NAME>
+        <DIGEST_ENTRY>
+            <DIGEST_TYPE>MD5</DIGEST_TYPE>
+            <DIGEST_HEX>f4f337b7fec387550b5eb653f6621bc4</DIGEST_HEX>
+        </DIGEST_ENTRY>
+    </FILE_ENTRY>
     <FILE_ENTRY>
         <FILE_NAME>daniel.txt</FILE_NAME>
         <DIGEST_ENTRY>
-            <DIGEST_TYPE>SHA1</DIGEST_TYPE>
-            <DIGEST_HEX>65463ee664abb5c35bda2713b394cbfb0a9df3a5</DIGEST_HEX>
-        </DIGEST_ENTRY>
-        <DIGEST_ENTRY>
             <DIGEST_TYPE>SHA256</DIGEST_TYPE>
             <DIGEST_HEX>b8e3bc65c7438ad83af40847a23a087e935cb0a19f090ad0fc79bab93ea06a1b</DIGEST_HEX>
+        </DIGEST_ENTRY>
+        <DIGEST_ENTRY>
+            <DIGEST_TYPE>SHA1</DIGEST_TYPE>
+            <DIGEST_HEX>65463ee664abb5c35bda2713b394cbfb0a9df3a5</DIGEST_HEX>
         </DIGEST_ENTRY>
         <DIGEST_ENTRY>
             <DIGEST_TYPE>MD5</DIGEST_TYPE>
@@ -20,19 +42,9 @@
             <DIGEST_TYPE>SHA512</DIGEST_TYPE>
             <DIGEST_HEX>77a8c5055982967847b4d87a160e8696f7aecef177badf3a3397f7e622016368c92fb76e6ff4707ed7b65a87be9be5180543dfa134e9ac55b41028cd37465e87</DIGEST_HEX>
         </DIGEST_ENTRY>
-    </FILE_ENTRY>
-    <FILE_ENTRY>
-        <FILE_NAME>marib.txt</FILE_NAME>
         <DIGEST_ENTRY>
             <DIGEST_TYPE>MD5</DIGEST_TYPE>
-            <DIGEST_HEX>f4f337b7fec387550b5eb653f6621bc4</DIGEST_HEX>
-        </DIGEST_ENTRY>
-    </FILE_ENTRY>
-    <FILE_ENTRY>
-        <FILE_NAME>dede.txt</FILE_NAME>
-        <DIGEST_ENTRY>
-            <DIGEST_TYPE>SHA1</DIGEST_TYPE>
-            <DIGEST_HEX>db4a6d4c2455229ac71d18f130b93cf5bc824a06</DIGEST_HEX>
+            <DIGEST_HEX>a8ce14dfa74df669fa19a6e1a51b85bd</DIGEST_HEX>
         </DIGEST_ENTRY>
     </FILE_ENTRY>
 </CATALOG>
