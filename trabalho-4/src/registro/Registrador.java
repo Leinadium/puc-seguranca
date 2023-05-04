@@ -13,7 +13,10 @@ public class Registrador {
         return instance;
     }
 
-    public void fazerRegistro() {
-
+    public void fazerRegistro(EnumRegistro registro, String nome) {
+        fazerRegistro(registro, nome, "");
+    }
+    public void fazerRegistro(EnumRegistro registro, String nome, String arquivo) {
+        System.out.println("registro" + registro.codigo + " nome " + nome + " arquivo " + arquivo);
     }
 }
