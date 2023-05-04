@@ -1,19 +1,19 @@
 import diretorio.Diretorio;
+import diretorio.Restaurador;
 
-import java.io.File;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class CofreDigital {
     public static void main(String[] args) throws Exception {
-        Diretorio dir = new Diretorio("teste");
-        File f = new File("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/admin-pkcs8-des.key");
+        Diretorio dir = new Diretorio("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files");
 
-        PrivateKey pk = dir.restauraChavePrivada(f.toPath(), "admin");
+        String pathPk = "/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/admin-pkcs8-des.key";
+        String pathCert = "/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/admin-x509.crt";
 
-        File env = new File("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files/index.env");
-        File enc = new File("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files/index.enc");
-        File asd = new File("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files/index.asd");
-
-        System.out.println(dir.decriptaArquivo(env.toPath(), enc.toPath(), asd.toPath(), pk));
+        PrivateKey privateKey = Restaurador.restauraChavePrivada(pathPk, "admin");
+        PublicKey publicKey = Restaurador.restauraChavePublica(pathCert);
+        dir.init(privateKey, publicKey);
+        dir.show();
     }
 }
