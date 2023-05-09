@@ -5,9 +5,7 @@ import java.util.Date;
 
 public class TokenGenerator {
 
-    private static final String SECRET_KEY = "chave_secreta_aqui"; // Semente secreta de 16 bytes
-
-    public static int generateToken(long currentTime) {// Carimbo de tempo atual em minutos
+    public static int generateToken(String SECRET_KEY, long currentTime) {// Carimbo de tempo atual em minutos
         String input = SECRET_KEY + currentTime; // Concatenação da semente secreta com o carimbo de tempo
         try {
             MessageDigest sha1 = MessageDigest.getInstance("SHA1");
