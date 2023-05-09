@@ -17,6 +17,10 @@ public class Diretorio {
         this.logger = Registrador.getInstance();
     }
 
+    public String getPath() {
+        return Arquivo.getBase();
+    }
+
     private void parseIndice(String texto) {
         this.linhasIndice = new ArrayList<>();
         String[] linhas = texto.split("\n");

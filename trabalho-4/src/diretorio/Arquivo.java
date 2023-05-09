@@ -19,6 +19,8 @@ public class Arquivo {
         dirBase = Paths.get(pathBase);
     }
 
+    public static String getBase() { return dirBase.toString(); }
+
     /** Inicializa um arquivo no cofre digital. */
     public Arquivo(String nome) throws FileNotFoundException {
         this.arqEnv = dirBase.resolve(nome + ".env");
