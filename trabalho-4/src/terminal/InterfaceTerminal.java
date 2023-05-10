@@ -1,7 +1,6 @@
 package terminal;
 
 import basedados.Usuario;
-import diretorio.Arquivo;
 import diretorio.Diretorio;
 import diretorio.LinhaIndice;
 
@@ -10,16 +9,6 @@ import java.util.Objects;
 import java.util.Scanner;
 
 public class InterfaceTerminal {
-    public static void mostrarInicio() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-        System.out.println("Bem vindo ao Cofre Digital!");
-        System.out.println("Escolha uma opção:");
-        System.out.println("1 - Criar novo diretório");
-        System.out.println("2 - Abrir diretório existente");
-        System.out.println("3 - Sair");
-    }
-
     static void limparTela() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
@@ -33,7 +22,7 @@ public class InterfaceTerminal {
     }
 
     public static Operacao menuPrincipal(Usuario usuario) {
-        int opcao = -1;
+        int opcao;
         while (true) {
             limparTela();
             mostrarCabecalho(usuario);
@@ -204,7 +193,7 @@ public class InterfaceTerminal {
 
     /** retorna -1 pra voltar, 0 para abrir o diretorio, e 1-n para a selecao de um arquivo*/
     public static int consultarPasta(Usuario usuario, Diretorio dir, ArrayList<LinhaIndice> linhas, String erro) {
-        String opcao = "";
+        String opcao;
         Scanner scanner = new Scanner(System.in);
         boolean show = linhas != null;
 
@@ -258,7 +247,7 @@ public class InterfaceTerminal {
     }
 
     public static Operacao telaSaida(Usuario usuario) {
-        int opcao = -1;
+        int opcao;
 
         boolean isError = false;
 
