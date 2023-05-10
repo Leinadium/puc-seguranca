@@ -3,5 +3,9 @@ package terminal;
 public enum Operacao {
     CADASTRAR_NOVO_USUARIO,
     CONSULTAR_PASTA,
-    SAIR_SISTEMA
+    SAIR_SISTEMA,
+    RETORNAR_MENU,
+    MOSTRAR_ARQUIVO,
+    MOSTRAR_ARQUIVOS,
+    ENCERRAR_SESSAO,
 }

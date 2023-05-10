@@ -40,7 +40,7 @@ public class Arquivo {
     }
 
     /** Decripta um arquivo do cofre digital. */
-    public String decriptaArquivo(PrivateKey pk) throws Exception {
+    public byte[] decriptaArquivo(PrivateKey pk) throws Exception {
         // inicializando os objetos
         Cipher cipherDes = Cipher.getInstance("DES/ECB/PKCS5Padding");
         Cipher cipherRsa = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -58,15 +58,14 @@ public class Arquivo {
 
         // decriptando o arquivo .enc
         cipherDes.init(Cipher.DECRYPT_MODE, simKey);
-        byte[] textoPlano = cipherDes.doFinal(Files.readAllBytes(this.arqEnc));
-        return new String(textoPlano);
+        return cipherDes.doFinal(Files.readAllBytes(this.arqEnc));
     }
 
     /** Valida a assinatura de um arquivo do cofre digital. */
-    public boolean autenticidadeArquivo(String textoPlano, PublicKey pubkey) throws Exception {
+    public boolean autenticidadeArquivo(byte[] textoPlano, PublicKey pubkey) throws Exception {
         Signature sig = Signature.getInstance("SHA1withRSA");
         sig.initVerify(pubkey);
-        sig.update(textoPlano.getBytes());
+        sig.update(textoPlano);
         return sig.verify(Files.readAllBytes(this.arqAsd));
     }
 }

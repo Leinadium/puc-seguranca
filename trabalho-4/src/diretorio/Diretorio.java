@@ -1,5 +1,6 @@
 package diretorio;
 
+import basedados.Usuario;
 import registro.Registrador;
 
 import java.security.PrivateKey;
@@ -37,18 +38,26 @@ public class Diretorio {
      */
     public void init(PrivateKey privateKey, PublicKey publicKey) throws Exception {
         this.arqIndice = new Arquivo("index");
-        String textoPlano = this.arqIndice.decriptaArquivo(privateKey);
-        System.out.println(textoPlano);
-        if (this.arqIndice.autenticidadeArquivo(textoPlano, publicKey)) {
+        byte[] textoPlanoBytes = this.arqIndice.decriptaArquivo(privateKey);
+        String textoPlano = new String(textoPlanoBytes);
+
+        // System.out.println(textoPlano);
+        // this.arqIndice.debug(textoPlanoBytes, publicKey, privateKey);
+
+        if (this.arqIndice.autenticidadeArquivo(textoPlanoBytes, publicKey)) {
             this.parseIndice(textoPlano);
         } else {
             throw new Exception("Arquivo de indice invalido");
         }
     }
 
-    public void show() {
+    public ArrayList<LinhaIndice> getLinhasUsuario(Usuario usuario) {
+        ArrayList<LinhaIndice> ret = new ArrayList<>();
         for (LinhaIndice linha : this.linhasIndice) {
-            System.out.println(linha.codigo+linha.nomeArquivo+linha.usuario+linha.grupo);
+            if (linha.grupo.equals(usuario.grupo) || linha.usuario.equals(usuario.login)) {
+                ret.add(linha);
+            }
         }
+        return ret;
     }
 }

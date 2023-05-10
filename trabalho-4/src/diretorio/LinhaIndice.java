@@ -1,6 +1,6 @@
 package diretorio;
 
-class LinhaIndice {
+public class LinhaIndice {
     public String codigo;
     public String nomeArquivo;
     public String usuario;
