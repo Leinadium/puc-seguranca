@@ -55,7 +55,7 @@ public class CofreDigital {
 
                 // pegando certificado
                 Certificate cert = Restaurador.restauraCertificado(form.pathCert);
-                CertificadoInfo certInfo = CertificadoInfo.fromCertificado((org.bouncycastle.asn1.x509.Certificate.getInstance(cert.getEncoded())));
+                CertificadoInfo certInfo = CertificadoInfo.fromCertificado((java.security.cert.X509Certificate) cert);
                 if (!InterfaceTerminal.confirmarCertificado(certInfo)) {
                     System.out.println("Fechando sistema (certificado invalido)");
                     return;
