@@ -1,13 +1,14 @@
 package autenticacao;
-import org.bouncycastle.util.encoders.Base64;
 import java.util.*;
 
 public class TecladoVirtual {
 
     public static void main(String[] args) {
         TecladoVirtual teclado = new TecladoVirtual();
-        String senhaCorreta = "1234567890";
-        teclado.lerSenha(senhaCorreta);
+        String senhaCorretaPlainText = "1234567890";
+        byte[] saltQualquer = Base64.getEncoder().encode("TRQ1SYrgQd".getBytes());
+        String senhaCorretaBCrypt = CriptoSenha.encripta(senhaCorretaPlainText, saltQualquer);
+        teclado.lerSenha(senhaCorretaBCrypt);
     }
 
     private static Scanner scanner = new Scanner(System.in);
@@ -47,8 +48,9 @@ public class TecladoVirtual {
         }
         String[] todasSenhas = gerarTodasSenhas(senhaInserida);
         System.out.println("Todas as senhas: " + Arrays.toString(todasSenhas));
-        String[] todasSenhasHash = hashTodasSenhas(todasSenhas);
-        System.out.println("Todas as senhas hash: " + Arrays.toString(todasSenhasHash));
+
+        // String[] todasSenhasHash = hashTodasSenhas(todasSenhas);
+        // System.out.println("Todas as senhas hash: " + Arrays.toString(todasSenhasHash));
 
         System.out.println("SALVE");
         boolean senhasIguais = comparaSenhas(senhaCorreta, todasSenhas);
@@ -98,18 +100,6 @@ public class TecladoVirtual {
         System.out.println("Todas as senhas: " + Arrays.toString(todasSenhas));
 
         return todasSenhas;
-    }
-
-    private String[] hashTodasSenhas(String[] todasSenhas) {
-
-        String salt = "123456789012";
-        byte[] saltBytes = Base64.encode(salt.getBytes());
-
-        String[] todasSenhasHash = new String[todasSenhas.length];
-        for (int i = 0; i < todasSenhas.length; i++) {
-            todasSenhasHash[i] = CriptoSenha.encripta(todasSenhas[i], saltBytes);
-        }
-        return todasSenhasHash;
     }
 
     private static String toHex(byte[] meusBytes) {
