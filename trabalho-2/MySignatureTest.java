@@ -40,6 +40,8 @@ public class MySignatureTest {
         System.out.println("\nChave publica: " + toHex(chaves.getPublic().getEncoded()));
         System.out.println("\nChave privada: " + toHex(chaves.getPrivate().getEncoded()));
 
+        System.out.println(chaves.getPublic().toString());
+
         // criando o objeto MySignature e configurando
         System.out.println("\n\nConfigurando MySignature para geração...");
         MySignature sig = MySignature.getInstance(padraoAssinatura);

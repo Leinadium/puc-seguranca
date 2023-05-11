@@ -1,6 +1,7 @@
 package terminal;
 
-import basedados.Usuario;
+import basedados.modelos.Usuario;
+import diretorio.CertificadoInfo;
 import diretorio.Diretorio;
 import diretorio.LinhaIndice;
 
@@ -16,9 +17,19 @@ public class InterfaceTerminal {
 
     static void mostrarCabecalho(Usuario usuario) {
         System.out.println("\n===============================");
-        System.out.println("Login: " + usuario.login);
-        System.out.println("Grupo: " + usuario.grupo);
+        System.out.println("Login: " + usuario.loginName);
+        System.out.println("Grupo: " + usuario.grupo.nome);
         System.out.println("Nome: " + usuario.nome);
+    }
+
+    public static String pedeFraseAdmin(String erro) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("==================================");
+        if (!erro.equals("")) {
+            System.out.println("Erro: " + erro);
+        }
+        System.out.println("Digite a frase secreta de administrador:");
+        return scanner.nextLine();
     }
 
     public static Operacao menuPrincipal(Usuario usuario) {
@@ -26,10 +37,10 @@ public class InterfaceTerminal {
         while (true) {
             limparTela();
             mostrarCabecalho(usuario);
-            System.out.println("\nTotal de acessos: " + usuario.totalAcessos);
+            System.out.println("\nTotal de acessos: " + usuario.numAcessos);
             System.out.println("\nMenu principal:");
 
-            boolean isAdmin = Objects.equals(usuario.grupo, "admin");
+            boolean isAdmin = Objects.equals(usuario.grupo.nome, "administrador");
 
             if (isAdmin) {
                 System.out.println("\n1 - Cadastrar novo usuário");
@@ -88,13 +99,19 @@ public class InterfaceTerminal {
 
         while (true) {
             limparTela();
-            mostrarCabecalho(usuario);
-            System.out.println("\nTotal de acessos: " + usuario.totalAcessos);
+            // se for nulo, eh um registro de um admin
+            if (usuario != null) {
+                mostrarCabecalho(usuario);
+                System.out.println("\nTotal de acessos: " + usuario.numAcessos);
+            }
             System.out.println("\nFormulário de Cadastro:");
             System.out.println("- Caminho do arquivo do certificado digital: " + formularioCadastro.pathCert);
             System.out.println("- Caminho do arquivo da chave privada: " + formularioCadastro.pathPk);
             System.out.println("- Frase secreta: " + formularioCadastro.fraseSecreta);
-            System.out.println("- Grupo: " + formularioCadastro.grupo);
+
+            if (usuario != null) { System.out.println("- Grupo: " + formularioCadastro.grupo); }
+            else { System.out.println("- Grupo: administrador"); }
+
             System.out.println("- Senha pessoal: " + esconderSenha(formularioCadastro.senhaPessoal));
             if (senhaValidada) {
                 System.out.println("- Senha pessoal: " + esconderSenha(formularioCadastro.senhaPessoal));
@@ -137,6 +154,9 @@ public class InterfaceTerminal {
                     } else {
                         erro = "";
                         campoAtual++;
+                        if (usuario == null) {
+                            campoAtual++;   // pula o registro de administrador
+                        }
                     }
                     break;
                 case 3:
@@ -144,11 +164,11 @@ public class InterfaceTerminal {
                     formularioCadastro.grupo = scanner.nextLine();
                     String grupo = formularioCadastro.grupo.toLowerCase();
                     if (grupo.equals("u") || grupo.equals("usuario")) {
-                        formularioCadastro.grupo = "Usuario";
+                        formularioCadastro.grupo = "usuario";
                         campoAtual++;
                         erro = "";
                     } else if (grupo.equals("a") || grupo.equals("administrador")) {
-                        formularioCadastro.grupo = "Administrador";
+                        formularioCadastro.grupo = "administrador";
                         campoAtual++;
                         erro = "";
                     } else {
@@ -191,6 +211,25 @@ public class InterfaceTerminal {
         }
     }
 
+    /** retorna true se o usuario confirmou, false se deseja voltar atras */
+    public static boolean confirmarCertificado(CertificadoInfo certInfo) {
+        limparTela();
+        System.out.println("Certificado encontrado:");
+
+        System.out.println(" - Versão: " + certInfo.versao);
+        System.out.println(" - Número de série: " + certInfo.serie);
+        System.out.println(" - Validade: " + certInfo.validade);
+        System.out.println(" - Tipo de assinatura: " + certInfo.tipoAssinatura);
+        System.out.println(" - Emissor: " + certInfo.nomeEmissor);
+        System.out.println(" - Sujeito: " + certInfo.nomeSujeito);
+        System.out.println(" - Email: " + certInfo.emailSujeito);
+
+        System.out.println("\nPressione ENTER para confirmar ou qualquer outra tecla para cancelar");
+        Scanner scanner = new Scanner(System.in);
+        String opcao = scanner.nextLine();
+        return opcao.equals("");
+    }
+
     /** retorna -1 pra voltar, 0 para abrir o diretorio, e 1-n para a selecao de um arquivo*/
     public static int consultarPasta(Usuario usuario, Diretorio dir, ArrayList<LinhaIndice> linhas, String erro) {
         String opcao;
@@ -200,7 +239,7 @@ public class InterfaceTerminal {
         while (true) {
             limparTela();
             mostrarCabecalho(usuario);
-            System.out.println("\nTotal de acessos: " + usuario.totalAcessos);
+            System.out.println("\nTotal de acessos: " + usuario.numAcessos);
             System.out.println("\nCaminho da pasta: " + dir.getPath());
             System.out.println("Frase secreta: " + usuario.fraseSecreta);
 
@@ -254,7 +293,7 @@ public class InterfaceTerminal {
         while (true) {
             limparTela();
             mostrarCabecalho(usuario);
-            System.out.println("\nTotal de acessos: " + usuario.totalAcessos);
+            System.out.println("\nTotal de acessos: " + usuario.numAcessos);
             System.out.println("\nSaída do sistema:");
 
             System.out.println("\n1 - Encerrar Sessão");

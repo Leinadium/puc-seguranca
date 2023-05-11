@@ -1,6 +1,6 @@
 package diretorio;
 
-import basedados.Usuario;
+import basedados.modelos.Usuario;
 import registro.Registrador;
 
 import java.security.PrivateKey;
@@ -40,10 +40,6 @@ public class Diretorio {
         this.arqIndice = new Arquivo("index");
         byte[] textoPlanoBytes = this.arqIndice.decriptaArquivo(privateKey);
         String textoPlano = new String(textoPlanoBytes);
-
-        // System.out.println(textoPlano);
-        // this.arqIndice.debug(textoPlanoBytes, publicKey, privateKey);
-
         if (this.arqIndice.autenticidadeArquivo(textoPlanoBytes, publicKey)) {
             this.parseIndice(textoPlano);
         } else {
@@ -54,7 +50,7 @@ public class Diretorio {
     public ArrayList<LinhaIndice> getLinhasUsuario(Usuario usuario) {
         ArrayList<LinhaIndice> ret = new ArrayList<>();
         for (LinhaIndice linha : this.linhasIndice) {
-            if (linha.grupo.equals(usuario.grupo) || linha.usuario.equals(usuario.login)) {
+            if (linha.grupo.equals(usuario.grupo.nome) || linha.usuario.equals(usuario.loginName)) {
                 ret.add(linha);
             }
         }

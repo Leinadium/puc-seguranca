@@ -3,6 +3,7 @@ package diretorio;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -11,8 +12,12 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.security.spec.PKCS8EncodedKeySpec;
+
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 public class Restaurador {
 
@@ -21,7 +26,7 @@ public class Restaurador {
      * Utiliza a chave simétrica para decriptar o arquivo .key, que resulta na chave privada em Base64
      * Depois, decodifica a chave privada em Base64 em bytes, para depois passar pelo EncodedKeySpec e KeyFactory
      * e retornar uma chave privada*/
-    public static PrivateKey restauraChavePrivada(String pathKey, String senha) throws Exception {
+    public static PrivateKey restauraChavePrivada(byte[] key, String senha) throws Exception {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         KeyGenerator kg = KeyGenerator.getInstance("DES");
         random.setSeed(senha.getBytes());
@@ -31,7 +36,7 @@ public class Restaurador {
         // decodifica o arquivo pathKey com a chave simetrica
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, simKey);
-        byte[] keyPrivadaBytes = cipher.doFinal(Files.readAllBytes(Paths.get(pathKey)));
+        byte[] keyPrivadaBytes = cipher.doFinal(key);
 
         // removendo do formato PEM (https://stackoverflow.com/a/63044908)
         String keyPrivadaPem = new String(keyPrivadaBytes);
@@ -48,12 +53,35 @@ public class Restaurador {
         return kf.generatePrivate(keySpec);
     }
 
+    public static byte[] restauraChavePrivadaBytes(String pathKey) throws Exception {
+        return Files.readAllBytes(Paths.get(pathKey));
+    }
+
     /** Restaura a chave pública a partir do arquivo
      * contendo o certificado digital da chave pública
      */
-    public static PublicKey restauraChavePublica(String pathCert) throws Exception {
+    public static Certificate restauraCertificado(String pathCert) throws Exception {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        Certificate cert = cf.generateCertificate(Files.newInputStream(Paths.get(pathCert)));
-        return cert.getPublicKey();
+        return cf.generateCertificate(Files.newInputStream(Paths.get(pathCert)));
+    }
+
+    public static String geraChavePublicaPem(PublicKey chave) throws Exception {
+        PemObject pemObject = new PemObject("RSA PUBLIC KEY", chave.getEncoded());
+        StringWriter stringWriter = new StringWriter();
+        PemWriter pemWriter = new PemWriter(stringWriter);
+        pemWriter.writeObject(pemObject);
+        pemWriter.close();
+        return stringWriter.toString();
+    }
+
+    public static PublicKey getChavePublica(String pem) throws Exception {
+        String key64 = pem
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replace("\n", "");
+
+        byte[] keyDecoded = Base64.getDecoder().decode(key64);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePublic(new X509EncodedKeySpec(keyDecoded));
     }
 }
