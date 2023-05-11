@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 
 public class CofreDigital {
@@ -69,6 +68,7 @@ public class CofreDigital {
                 admin.loginName = certInfo.emailSujeito;
                 admin.nome = certInfo.nomeSujeito;
                 // usuario.fraseSecreta = form.fraseSecreta;        // NAO PODE SALVAR SENHA DO ADMIN
+                admin.senha = "kkkk".getBytes();        // TODO: senha
                 admin.bloqueado = 0;
                 admin.semente = "";       // TODO: semente
                 admin.grupo = this.conexao.getGrupo(form.grupo);
@@ -91,8 +91,8 @@ public class CofreDigital {
                 );
 
             } else {
-                String erro = "Erro inesperado";
-                while (!erro.equals("")) {
+                String erro = "";
+                do {
                     String fraseTalvez = InterfaceTerminal.pedeFraseAdmin(erro);
                     // tentando validar a chave
                     try {
@@ -105,7 +105,7 @@ public class CofreDigital {
                     } catch (Exception e) {
                         erro = "Frase inválida (" + e.getMessage() + ")";
                     }
-                }
+                } while (!erro.equals(""));
             }
 
         } catch (Exception e) {
@@ -122,6 +122,12 @@ public class CofreDigital {
 
     private void loopAutenticacao() {
         // TODO: autenticacao do usuario
+        try {
+            this.usuario = this.conexao.getUsuario("admin@inf1416.puc-rio.br");
+        } catch (Exception e) {
+            System.out.println("Erro ao pegar usuario admin: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     private void loopSistema() {
@@ -130,7 +136,7 @@ public class CofreDigital {
             Operacao operacao = InterfaceTerminal.menuPrincipal(this.usuario);
             switch (operacao) {
                 case CADASTRAR_NOVO_USUARIO:
-                    this.cadastrarNovoUsuario(null);
+                    this.cadastrarNovoUsuario();
                     break;
                 case CONSULTAR_PASTA:
                     this.consultarPasta();
@@ -144,10 +150,9 @@ public class CofreDigital {
         this.usuario = null;
     }
 
-    private void cadastrarNovoUsuario(FormularioCadastro form) {
-        if (form == null) {
-            form = InterfaceTerminal.mostrarFormularioCadastro(null);
-        }
+    private void cadastrarNovoUsuario() {
+        FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario);
+
     }
 
     private void consultarPasta() {

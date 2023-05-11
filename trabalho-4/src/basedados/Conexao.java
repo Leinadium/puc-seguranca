@@ -206,7 +206,7 @@ public class Conexao {
 
     /** Coleta o chaveiro de algum admin do banco */
     public Chaveiro chaveiroAdmin() {
-        String sql = "SELECT c.kid, c.certificado, c.chavePrivada " +
+        String sql = "SELECT c.kid, c.chavePublicaPem, c.chavePrivada " +
                      "FROM chaveiros c, usuarios u, grupos g " +
                      "WHERE c.kid = u.kid AND u.gid = g.gid AND g.nome = 'administrador'";
         try {

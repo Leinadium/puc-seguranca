@@ -155,6 +155,7 @@ public class InterfaceTerminal {
                         erro = "";
                         campoAtual++;
                         if (usuario == null) {
+                            formularioCadastro.grupo = "administrador";
                             campoAtual++;   // pula o registro de administrador
                         }
                     }
