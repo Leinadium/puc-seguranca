@@ -1,8 +1,5 @@
-package diretorio;
+package autenticacao;
 
-import diretorio.TokenGenerator;
-
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Date;
 public class TokenVerifier {
