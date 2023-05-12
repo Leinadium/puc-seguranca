@@ -22,7 +22,7 @@ public class Usuario {
     public String fraseSecreta;
 
     /** senha criptografada */
-    public byte[] senha;
+    public String senha;
 
     /** semente para decriptar a senha */
     public byte[] semente;
@@ -39,7 +39,7 @@ public class Usuario {
         this.nome = "";
         this.fraseSecreta = "";
         this.bloqueado = null;
-        this.senha = null;
+        this.senha = "";
         this.semente = null;
         this.chaveiro = null;
         this.grupo = null;
