@@ -23,7 +23,7 @@ public class CofreDigital {
     boolean fecharSistema;
 
     public static void main(String[] args) throws Exception {
-        CofreDigital cofre = new CofreDigital("/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files");
+        CofreDigital cofre = new CofreDigital("./trabalho-4/Pacote-T4/Files");
         cofre.mainFinal();
     }
 
@@ -78,13 +78,14 @@ public class CofreDigital {
                 admin.chaveiro = new Chaveiro();
                 admin.chaveiro.chavePrivadaBytes = chavePrivadaBytes;
                 admin.chaveiro.chavePublicaPem = Restaurador.geraChavePublicaPem(cert.getPublicKey());
-                this.conexao.setUsuario(admin);
 
                 // validando (sera jogada uma excecao se der errado)
                 Restaurador.restauraChavePrivada(
                         admin.chaveiro.chavePrivadaBytes,
                         form.fraseSecreta
                 );
+
+                this.conexao.setUsuario(admin);
 
                 // armazenando informacoes do adm
                 this.infoAdmin.set(
