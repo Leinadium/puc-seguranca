@@ -1,5 +1,7 @@
 import basedados.modelos.Chaveiro;
 import basedados.modelos.Usuario;
+import criptografia.CriptoToken;
+import criptografia.Restaurador;
 import diretorio.*;
 import basedados.Conexao;
 import terminal.FormularioCadastro;
@@ -68,9 +70,9 @@ public class CofreDigital {
                 admin.loginName = certInfo.emailSujeito;
                 admin.nome = certInfo.nomeSujeito;
                 // usuario.fraseSecreta = form.fraseSecreta;        // NAO PODE SALVAR SENHA DO ADMIN
-                admin.senha = "kkkk".getBytes();        // TODO: senha
+                admin.senha = "kkkk";        // TODO: senha
                 admin.bloqueado = null;
-                admin.semente = null;       // TODO: semente
+                admin.semente = CriptoToken.geraSemente(form.senhaPessoal);
                 admin.grupo = this.conexao.getGrupo(form.grupo);
                 admin.chaveiro = new Chaveiro();
                 admin.chaveiro.chavePrivadaBytes = chavePrivadaBytes;
@@ -89,7 +91,6 @@ public class CofreDigital {
                         admin.chaveiro.chavePrivadaBytes,
                         admin.chaveiro.chavePublicaPem
                 );
-
             } else {
                 String erro = "";
                 do {
@@ -112,7 +113,6 @@ public class CofreDigital {
             System.out.println("Erro na primeira execucao do sistema: " + e.getMessage());
             return;
         }
-
 
         while (!this.fecharSistema) {
             this.loopAutenticacao();
@@ -196,9 +196,9 @@ public class CofreDigital {
 
             usuario.nome = certInfo.nomeSujeito;
             usuario.fraseSecreta = form.fraseSecreta;
-            usuario.senha = form.senhaPessoal.getBytes();   // TODO: senha
+            usuario.senha = form.senhaPessoal;   // TODO: senha
             usuario.bloqueado = null;
-            usuario.semente = null;       // TODO: semente
+            usuario.semente = CriptoToken.geraSemente(form.senhaPessoal);
             try {      // PEGANDO GRUPO
                 usuario.grupo = this.conexao.getGrupo(form.grupo);
             } catch (Exception e) {
@@ -253,7 +253,7 @@ public class CofreDigital {
         while (r != -1) {   // -1 = sair
             r = InterfaceTerminal.consultarPasta(this.usuario, this.diretorio, linhas, erro);
             if (r == 0) {   // mostrar pasta
-                // TODO: validar frase secreta do usuario
+                // TODO: validar frase secreta do usuario (ue ja nao foi verificada??)
 
                 try {
                     this.diretorio.init(this.infoAdmin.getPrivateKey(), this.infoAdmin.getPublicKey());

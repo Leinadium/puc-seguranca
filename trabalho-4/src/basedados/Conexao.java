@@ -166,7 +166,7 @@ public class Conexao {
             usuario.numAcessos = rs.getInt("numAcessos");
             usuario.bloqueado = rs.getDate("bloqueado");
             usuario.fraseSecreta = rs.getString("fraseSecreta");
-            usuario.senha = rs.getBytes("senha");
+            usuario.senha = rs.getString("senha");
             usuario.semente = rs.getBytes("semente");
             usuario.chaveiro = getChaveiro(rs.getInt("kid"));
             usuario.grupo = getGrupo(rs.getInt("gid"));
@@ -205,7 +205,7 @@ public class Conexao {
         pstmt.setInt(3, usuario.numAcessos);
         pstmt.setDate(4, usuario.bloqueado);
         pstmt.setString(5, usuario.fraseSecreta);
-        pstmt.setBytes(6, usuario.senha);
+        pstmt.setString(6, usuario.senha);
         pstmt.setBytes(7, usuario.semente);
         pstmt.setInt(8, usuario.chaveiro.kid);
         pstmt.setInt(9, usuario.grupo.gid);
