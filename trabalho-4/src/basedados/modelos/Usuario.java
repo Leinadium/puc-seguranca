@@ -1,5 +1,7 @@
 package basedados.modelos;
 
+import java.sql.Date;
+
 public class Usuario {
     /** identificador do usuario */
     public int uid;
@@ -13,8 +15,8 @@ public class Usuario {
     /** quantidade de acessos */
     public int numAcessos;
 
-    /** se o usuario esta bloqueado ou nao */
-    public int bloqueado;
+    /** a hora de bloqueio do usuario */
+    public Date bloqueado;
 
     /** frase secreta (para certificado?) */
     public String fraseSecreta;
@@ -23,7 +25,7 @@ public class Usuario {
     public byte[] senha;
 
     /** semente para decriptar a senha */
-    public String semente;
+    public byte[] semente;
 
     /** chaveiro do usuario */
     public Chaveiro chaveiro;
@@ -36,9 +38,9 @@ public class Usuario {
         this.loginName = "";
         this.nome = "";
         this.fraseSecreta = "";
-        this.bloqueado = 0;
+        this.bloqueado = null;
         this.senha = null;
-        this.semente = "";
+        this.semente = null;
         this.chaveiro = null;
         this.grupo = null;
     }

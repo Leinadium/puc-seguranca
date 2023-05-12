@@ -5,6 +5,7 @@ import basedados.modelos.Grupo;
 import basedados.modelos.Usuario;
 
 import java.sql.*;
+import java.util.Calendar;
 
 
 public class Conexao {
@@ -24,10 +25,10 @@ public class Conexao {
             + "	loginName TEXT NOT NULL UNIQUE,\n"
             + "	nome TEXT NOT NULL,\n"
             + "	numAcessos INTEGER,\n"
-            + "	bloqueado INTEGER NOT NULL,\n"
+            + "	bloqueado TEXT,\n"
             + "	fraseSecreta TEXT NOT NULL,\n"
             + "	senha BLOB NOT NULL,\n"
-            + "	semente TEXT NOT NULL,\n"
+            + "	semente BLOB NOT NULL,\n"
             + "	kid INTEGER NOT NULL,\n"
             + "	gid INTEGER NOT NULL\n"
             + ");";
@@ -142,6 +143,14 @@ public class Conexao {
         return chaveiro;
     }
 
+    public boolean existeLoginName(String loginName) throws Exception {
+        String sql = "SELECT uid FROM usuarios WHERE loginName = ?";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, loginName);
+        ResultSet rs = pstmt.executeQuery();
+        return rs.next();
+    }
+
     public Usuario getUsuario(String loginName) throws Exception {
         Usuario usuario = new Usuario();
         String sql = "SELECT uid, loginName, nome, numAcessos, bloqueado, fraseSecreta, senha, semente, kid, gid " +
@@ -155,10 +164,10 @@ public class Conexao {
             usuario.loginName = rs.getString("loginName");
             usuario.nome = rs.getString("nome");
             usuario.numAcessos = rs.getInt("numAcessos");
-            usuario.bloqueado = rs.getInt("bloqueado");
+            usuario.bloqueado = rs.getDate("bloqueado");
             usuario.fraseSecreta = rs.getString("fraseSecreta");
             usuario.senha = rs.getBytes("senha");
-            usuario.semente = rs.getString("semente");
+            usuario.semente = rs.getBytes("semente");
             usuario.chaveiro = getChaveiro(rs.getInt("kid"));
             usuario.grupo = getGrupo(rs.getInt("gid"));
         } else {
@@ -194,14 +203,13 @@ public class Conexao {
         pstmt.setString(1, usuario.loginName);
         pstmt.setString(2, usuario.nome);
         pstmt.setInt(3, usuario.numAcessos);
-        pstmt.setInt(4, usuario.bloqueado);
+        pstmt.setDate(4, usuario.bloqueado);
         pstmt.setString(5, usuario.fraseSecreta);
         pstmt.setBytes(6, usuario.senha);
-        pstmt.setString(7, usuario.semente);
+        pstmt.setBytes(7, usuario.semente);
         pstmt.setInt(8, usuario.chaveiro.kid);
         pstmt.setInt(9, usuario.grupo.gid);
         pstmt.executeUpdate();
-
     }
 
     /** Coleta o chaveiro de algum admin do banco */
@@ -223,5 +231,29 @@ public class Conexao {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    public boolean usuarioEstaBloqueado(Usuario usuario) {
+        if (usuario.bloqueado == null) {
+            return false;
+        }
+        // verificando se a hora atual eh dois minutos maior que a hora em .bloqueado
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(usuario.bloqueado);
+        cal.add(Calendar.MINUTE, 2);
+        java.util.Date data = cal.getTime();
+        return data.before(new java.util.Date());
+    }
+
+    public void bloquearUsuario(Usuario usuario) {
+        String sql = "UPDATE usuarios SET bloqueado = ? WHERE uid = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setDate(1, null);
+            pstmt.setInt(2, usuario.uid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

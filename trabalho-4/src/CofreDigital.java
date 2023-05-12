@@ -46,7 +46,7 @@ public class CofreDigital {
             Chaveiro chaveiroAdmin = this.conexao.chaveiroAdmin();
             if (chaveiroAdmin == null) {        // CADASTRO DO ADMIN!!
                 // pegando formulario
-                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null);
+                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "");
                 if (form == null) {
                     System.out.println("Fechando sistema (cadastro abortado");
                     return;
@@ -54,8 +54,8 @@ public class CofreDigital {
 
                 // pegando certificado
                 Certificate cert = Restaurador.restauraCertificado(form.pathCert);
-                CertificadoInfo certInfo = CertificadoInfo.fromCertificado((java.security.cert.X509Certificate) cert);
-                if (!InterfaceTerminal.confirmarCertificado(certInfo)) {
+                CertificadoInfo certInfo = CertificadoInfo.fromCertificado(cert);
+                if (InterfaceTerminal.verificarCertificadoInvalido(certInfo)) {
                     System.out.println("Fechando sistema (certificado invalido)");
                     return;
                 }
@@ -69,8 +69,8 @@ public class CofreDigital {
                 admin.nome = certInfo.nomeSujeito;
                 // usuario.fraseSecreta = form.fraseSecreta;        // NAO PODE SALVAR SENHA DO ADMIN
                 admin.senha = "kkkk".getBytes();        // TODO: senha
-                admin.bloqueado = 0;
-                admin.semente = "";       // TODO: semente
+                admin.bloqueado = null;
+                admin.semente = null;       // TODO: semente
                 admin.grupo = this.conexao.getGrupo(form.grupo);
                 admin.chaveiro = new Chaveiro();
                 admin.chaveiro.chavePrivadaBytes = chavePrivadaBytes;
@@ -125,7 +125,7 @@ public class CofreDigital {
         try {
             this.usuario = this.conexao.getUsuario("admin@inf1416.puc-rio.br");
         } catch (Exception e) {
-            System.out.println("Erro ao pegar usuario admin: " + e.getMessage());
+            System.out.println("Erro ao pegar usuario: " + e.getMessage());
             System.exit(1);
         }
     }
@@ -145,13 +145,104 @@ public class CofreDigital {
                     sair = this.processarSaida();
             }
         }
-
         // resetando usuario
         this.usuario = null;
     }
 
     private void cadastrarNovoUsuario() {
-        FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario);
+        String erro = "";
+        while (true) {
+            FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario, erro);
+            if (form == null) {
+                // cadastro abortado
+                break;
+            }
+            // pegando o certificado
+            Certificate cert;
+            CertificadoInfo certInfo;
+            try {
+                cert = Restaurador.restauraCertificado(form.pathCert);
+                certInfo = CertificadoInfo.fromCertificado(cert);
+                if (InterfaceTerminal.verificarCertificadoInvalido(certInfo)) {
+                    // cadastro recusado
+                    continue;
+                }
+            } catch (Exception e) {
+                erro = "Certificado invalido (" + e.getMessage() + ")";
+                continue;
+            }
+
+            // pegando a chave privada
+            byte[] chavePrivadaBytes;
+            try {
+                chavePrivadaBytes = Restaurador.restauraChavePrivadaBytes(form.pathPk);
+            } catch (Exception e) {
+                erro = "Chave privada invalida (" + e.getMessage() + ")";
+                continue;
+            }
+
+            // criando usuario
+            Usuario usuario = new Usuario();
+            usuario.loginName = certInfo.emailSujeito;
+            try {
+                if (this.conexao.existeLoginName(usuario.loginName)) {
+                    erro = "Login name já existe";
+                    continue;
+                }
+            } catch (Exception e) {
+                erro = "Erro ao verificar login name (" + e.getMessage() + ")";
+                continue;
+            }
+
+            usuario.nome = certInfo.nomeSujeito;
+            usuario.fraseSecreta = form.fraseSecreta;
+            usuario.senha = form.senhaPessoal.getBytes();   // TODO: senha
+            usuario.bloqueado = null;
+            usuario.semente = null;       // TODO: semente
+            try {      // PEGANDO GRUPO
+                usuario.grupo = this.conexao.getGrupo(form.grupo);
+            } catch (Exception e) {
+                erro = "Grupo inválida ou banco de dados inválido (" + e.getMessage() + ")";
+                continue;
+            }
+            usuario.chaveiro = new Chaveiro();
+            usuario.chaveiro.chavePrivadaBytes = chavePrivadaBytes;
+            PrivateKey privk;
+            PublicKey pubk = cert.getPublicKey();
+            try {       // PEGANDO CHAVE PUBLICA
+                usuario.chaveiro.chavePublicaPem = Restaurador.geraChavePublicaPem(pubk);
+            } catch (Exception e) {
+                erro = "Chave pública inválida (" + e.getMessage() + ")";
+                continue;
+            }
+            try {       // PEGANDO CHAVE PRIVADA
+                privk = Restaurador.restauraChavePrivada(
+                        usuario.chaveiro.chavePrivadaBytes,
+                        usuario.fraseSecreta
+                );
+            } catch (Exception e) {
+                erro = "Frase secreta inválida (" + e.getMessage() + ")";
+                continue;
+            }
+            try {       // VALIDANDO CHAVES
+                if (!Restaurador.testaChaves(privk, pubk)) {
+                    erro = "Chaves privada e pública não combinam";
+                    continue;
+                }
+            } catch (Exception e) {
+                erro = "Erro ao testar chaves (" + e.getMessage() + ")";
+                continue;
+            }
+
+            try {       // SALVANDO USUARIO
+                this.conexao.setUsuario(usuario);
+            } catch (Exception e) {
+                erro = "Erro ao gravar usuário (" + e.getMessage() + ")";
+                continue;
+            }
+
+            break;
+        }
 
     }
 

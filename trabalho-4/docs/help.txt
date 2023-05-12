@@ -1,0 +1,16 @@
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Files
+
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/admin-x509.crt
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/admin-pkcs8-des.key
+
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/user01-x509.crt
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/user01-pkcs8-des.key
+
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/user02-x509.crt
+
+/home/leinadium/puc/puc-seguranca/trabalho-4/Pacote-T4/Keys/user02-pkcs8-des.key

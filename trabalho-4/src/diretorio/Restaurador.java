@@ -6,10 +6,7 @@ import javax.crypto.SecretKey;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.X509EncodedKeySpec;
@@ -83,5 +80,23 @@ public class Restaurador {
         byte[] keyDecoded = Base64.getDecoder().decode(key64);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(new X509EncodedKeySpec(keyDecoded));
+    }
+
+    /** testa as chaves fazendo a assinatura num array de 4096 bytes aleatorios e testando a assinatura */
+    public static boolean testaChaves(PrivateKey priv, PublicKey pub) throws Exception {
+        byte[] documento = new byte[4096];
+        SecureRandom.getInstanceStrong().nextBytes(documento);
+
+        // assinando o documento
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initSign(priv);
+        sig.update(documento);
+        byte[] assinatura = sig.sign();
+
+        // conferindo assinatura
+        sig.initVerify(pub);
+        sig.update(documento);
+        return sig.verify(assinatura);
+
     }
 }

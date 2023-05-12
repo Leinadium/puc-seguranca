@@ -89,13 +89,12 @@ public class InterfaceTerminal {
         return null;
     }
 
-    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario) {
+    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario, String erro) {
         FormularioCadastro formularioCadastro = new FormularioCadastro();
         Scanner scanner = new Scanner(System.in);
 
         int campoAtual = 0;
         boolean senhaValidada = false;
-        String erro = "";
 
         while (true) {
             limparTela();
@@ -213,7 +212,7 @@ public class InterfaceTerminal {
     }
 
     /** retorna true se o usuario confirmou, false se deseja voltar atras */
-    public static boolean confirmarCertificado(CertificadoInfo certInfo) {
+    public static boolean verificarCertificadoInvalido(CertificadoInfo certInfo) {
         limparTela();
         System.out.println("Certificado encontrado:");
 
@@ -228,7 +227,7 @@ public class InterfaceTerminal {
         System.out.println("\nPressione ENTER para confirmar ou qualquer outra tecla para cancelar");
         Scanner scanner = new Scanner(System.in);
         String opcao = scanner.nextLine();
-        return opcao.equals("");
+        return !opcao.equals("");
     }
 
     /** retorna -1 pra voltar, 0 para abrir o diretorio, e 1-n para a selecao de um arquivo*/

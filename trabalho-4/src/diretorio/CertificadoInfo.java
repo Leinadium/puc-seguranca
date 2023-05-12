@@ -3,13 +3,10 @@ package diretorio;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.Certificate;
-
-import java.util.regex.Pattern;
 
 public class CertificadoInfo {
     public int versao;
@@ -20,7 +17,8 @@ public class CertificadoInfo {
     public String nomeSujeito;
     public String emailSujeito;
 
-    public static CertificadoInfo fromCertificado(X509Certificate cert) throws Exception {
+    public static CertificadoInfo fromCertificado(java.security.cert.Certificate certX) throws Exception {
+        X509Certificate cert = (X509Certificate) certX;
         CertificadoInfo info = new CertificadoInfo();
         info.versao = cert.getVersion();
         info.serie = cert.getSerialNumber().toString();
