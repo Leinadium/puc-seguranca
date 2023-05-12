@@ -1,3 +1,4 @@
+import autenticacao.CriptoSenha;
 import basedados.modelos.Chaveiro;
 import basedados.modelos.Usuario;
 import criptografia.CriptoToken;
@@ -70,7 +71,7 @@ public class CofreDigital {
                 admin.loginName = certInfo.emailSujeito;
                 admin.nome = certInfo.nomeSujeito;
                 // usuario.fraseSecreta = form.fraseSecreta;        // NAO PODE SALVAR SENHA DO ADMIN
-                admin.senha = "kkkk";        // TODO: senha
+                admin.senha = CriptoSenha.encripta(form.senhaPessoal);
                 admin.bloqueado = null;
                 admin.semente = CriptoToken.geraSemente(form.senhaPessoal);
                 admin.grupo = this.conexao.getGrupo(form.grupo);
@@ -196,7 +197,7 @@ public class CofreDigital {
 
             usuario.nome = certInfo.nomeSujeito;
             usuario.fraseSecreta = form.fraseSecreta;
-            usuario.senha = form.senhaPessoal;   // TODO: senha
+            usuario.senha = CriptoSenha.encripta(form.senhaPessoal);
             usuario.bloqueado = null;
             usuario.semente = CriptoToken.geraSemente(form.senhaPessoal);
             try {      // PEGANDO GRUPO
