@@ -36,6 +36,8 @@ public class TecladoVirtual {
 
     public boolean lerSenha(String senhaCorreta) {
         Scanner scanner = new Scanner(System.in);
+
+
         for (int i = 0; i < 10; i += 1) {
             Collections.shuffle(this.botoes);
             boolean enviou = escolherBotao(scanner, this.botoes,i >= 8);
@@ -46,11 +48,14 @@ public class TecladoVirtual {
         String[] todasSenhas = gerarTodasSenhas(senhaInserida);
 
         boolean senhasIguais = comparaSenhas(senhaCorreta, todasSenhas);
-        if (senhasIguais) {
+
+        if(senhasIguais){
             System.out.println("Senha correta!");
-        } else {
+        }
+        else{
             System.out.println("Senha incorreta!");
         }
+
         return senhasIguais;
     }
 
@@ -99,15 +104,5 @@ public class TecladoVirtual {
         }
 
         return todasSenhas;
-    }
-
-    private static String toHex(byte[] meusBytes) {
-        // converte o signature para hexadecimal
-        StringBuilder buf = new StringBuilder();
-        for (byte meusByte : meusBytes) {
-            String hex = Integer.toHexString(0x0100 + (meusByte & 0x00FF)).substring(1);
-            buf.append(hex.length() < 2 ? "0" : "").append(hex);
-        }
-        return buf.toString();
     }
 }
