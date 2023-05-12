@@ -47,13 +47,13 @@ public class Login {
                     } else {
                         System.out.println("O login name inserido é um e-mail válido!");
                         boolean senhaCheck;
-                        int tentativas = 0;
-                        String senhaCorretaPlainText = "1234567890";
-                        byte[] saltQualquer = Base64.getEncoder().encode("TRQ1SYrgQd".getBytes());
-                        String senhaCorretaBCrypt = CriptoSenha.encripta(senhaCorretaPlainText, saltQualquer);
+                        boolean tokenCheck;
+                        int tentativas_senha = 0;
+                        int tentativas_token = 0;
+                        String senhaCorretaBCrypt = usuario.senha;
 
                         while (true) {
-                            if (tentativas == 3) {
+                            if (tentativas_senha == 3) {
                                 System.out.println("O acesso do usuário foi bloqueado.");
                                 break;
                             } else {
@@ -61,12 +61,30 @@ public class Login {
                                 senhaCheck = teclado.lerSenha(senhaCorretaBCrypt);
                                 if (senhaCheck) {
                                     System.out.println("Senha correta!");
-                                    tentativas = 0;
+                                    tentativas_senha = 0;
+                                    while(true){
+                                        if (tentativas_token == 3){
+                                            System.out.println("O acesso do usuário foi bloqueado.");
+                                            break;
+                                        } else{
+                                            tokenCheck = VerificadorToken.verifica(usuario);
+                                            if(tokenCheck){
+                                                System.out.println("Token correto!");
+                                                tentativas_token = 0;
+                                                break;
+                                            } else{
+                                                System.out.println("Token incorreto!");
+                                                tentativas_token++;
+                                                System.out.println("Tentativas restantes: " + (3 - tentativas_token));
+                                            }
+                                        }
+                                    }
+
                                     return;
                                 } else {
                                     System.out.println("Senha incorreta!");
-                                    tentativas++;
-                                    System.out.println("Tentativas restantes: " + (3 - tentativas));
+                                    tentativas_senha++;
+                                    System.out.println("Tentativas restantes: " + (3 - tentativas_senha));
                                 }
                             }
                         }

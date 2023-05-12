@@ -3,14 +3,6 @@ import java.util.*;
 
 public class TecladoVirtual {
 
-    public static void main(String[] args) {
-        TecladoVirtual teclado = new TecladoVirtual();
-        String senhaCorretaPlainText = "1234567890";
-        byte[] saltQualquer = Base64.getEncoder().encode("TRQ1SYrgQd".getBytes());
-        String senhaCorretaBCrypt = CriptoSenha.encripta(senhaCorretaPlainText, saltQualquer);
-        teclado.lerSenha(senhaCorretaBCrypt);
-    }
-
     private final ArrayList<Integer> botoes;
     private final ArrayList<ArrayList<Integer>> senhaInserida = new ArrayList<>();
 

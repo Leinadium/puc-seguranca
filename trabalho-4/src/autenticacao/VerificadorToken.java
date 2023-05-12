@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.util.Date;
 public class VerificadorToken {
 
-    public static void verifica(Usuario usuario) {
+    public static boolean verifica(Usuario usuario) {
 
         long tempoAtual = new Date().getTime()/ (60000);
         byte[] semente = usuario.semente;
@@ -18,11 +18,7 @@ public class VerificadorToken {
 
         boolean ehValido = verificaToken(semente, tokenUsuario);
 
-        if (ehValido) {
-            System.out.println("Token válido.");
-        } else {
-            System.out.println("Token inválido.");
-        }
+        return ehValido;
     }
 
     private static boolean verificaToken(byte[] semente, int tokenUsuario) {
