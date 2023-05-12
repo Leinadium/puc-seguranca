@@ -1,4 +1,4 @@
-package diretorio;
+package criptografia;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
