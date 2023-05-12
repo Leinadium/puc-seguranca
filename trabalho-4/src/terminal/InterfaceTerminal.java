@@ -184,7 +184,7 @@ public class InterfaceTerminal {
                     String x = validarSenha(formularioCadastro.senhaPessoal);
                     if (x != null) {
                         erro = x;
-                        formularioCadastro.senhaPessoal = "";;
+                        formularioCadastro.senhaPessoal = "";
                         registrador.fazerRegistro(EnumRegistro.SENHA_PESSOAL_INVALIDA, usuario == null ? "adminInicial" : usuario.loginName);
                     } else {
                         erro = "";
