@@ -1,6 +1,7 @@
 package diretorio;
 
 import basedados.modelos.Usuario;
+import registro.EnumRegistro;
 import registro.Registrador;
 
 import java.security.PrivateKey;
@@ -36,14 +37,32 @@ public class Diretorio {
      * Inicializa o diretorio passando as configuracoes necessarias para
      * decriptar e validar o arquivo
      */
-    public void init(PrivateKey privateKey, PublicKey publicKey) throws Exception {
-        this.arqIndice = new Arquivo("index");
-        byte[] textoPlanoBytes = this.arqIndice.decriptaArquivo(privateKey);
-        String textoPlano = new String(textoPlanoBytes);
-        if (this.arqIndice.autenticidadeArquivo(textoPlanoBytes, publicKey)) {
-            this.parseIndice(textoPlano);
-        } else {
+    public void init(PrivateKey privateKey, PublicKey publicKey, Registrador registrador, Usuario usuario) throws Exception {
+        try {
+            this.arqIndice = new Arquivo("index");
+        } catch (Exception e) {
+            registrador.fazerRegistro(EnumRegistro.CAMINHO_PASTA_INVALIDO, usuario.loginName);
+            throw new Exception("Arquivo de indice nao encontrado");
+        }
+        byte[] textoPlanoBytes;
+        try {
+            registrador.fazerRegistro(EnumRegistro.ARQUIVO_INDICE_DECRIPTADO_SUCESSO, usuario.loginName);
+            textoPlanoBytes = this.arqIndice.decriptaArquivo(privateKey);
+        } catch (Exception e) {
+            registrador.fazerRegistro(EnumRegistro.ARQUIVO_INDICE_DECRIPTADO_FALHA, usuario.loginName);
             throw new Exception("Arquivo de indice invalido");
+        }
+        String textoPlano = new String(textoPlanoBytes);
+        try {
+            if (this.arqIndice.autenticidadeArquivo(textoPlanoBytes, publicKey)) {
+                this.parseIndice(textoPlano);
+                registrador.fazerRegistro(EnumRegistro.ARQUIVO_INDICE_VALIDADO_SUCESSO, usuario.loginName);
+            } else {
+                throw new Exception("Arquivo de indice invalido");
+            }
+        } catch (Exception e) {
+            registrador.fazerRegistro(EnumRegistro.ARQUIVO_INDICE_VALIDADO_FALHA, usuario.loginName);
+            throw e;
         }
     }
 

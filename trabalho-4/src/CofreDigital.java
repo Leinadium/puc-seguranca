@@ -5,6 +5,8 @@ import criptografia.CriptoToken;
 import criptografia.Restaurador;
 import diretorio.*;
 import basedados.Conexao;
+import registro.Registrador;
+import registro.EnumRegistro;
 import terminal.FormularioCadastro;
 import terminal.InterfaceTerminal;
 import terminal.Operacao;
@@ -20,6 +22,8 @@ public class CofreDigital {
     Usuario usuario;
     Conexao conexao;
     InfoAdmin infoAdmin;
+
+    Registrador registrador;
     boolean fecharSistema;
 
     public static void main(String[] args) throws Exception {
@@ -29,6 +33,7 @@ public class CofreDigital {
 
     public CofreDigital(String dirPath) {
         this.diretorio = new Diretorio(dirPath);
+        this.registrador = Registrador.getInstance();
         this.usuario = null;
         this.conexao = null;
         this.infoAdmin = new InfoAdmin();
@@ -44,12 +49,14 @@ public class CofreDigital {
             System.out.println("Erro ao conectar com o banco de dados.");
             return;
         }
+        this.registrador.setConexao(this.conexao);
+        this.registrador.fazerRegistro(EnumRegistro.SISTEMA_INICIADO);
 
         try {
             Chaveiro chaveiroAdmin = this.conexao.chaveiroAdmin();
             if (chaveiroAdmin == null) {        // CADASTRO DO ADMIN!!
                 // pegando formulario
-                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "");
+                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "", this.registrador);
                 if (form == null) {
                     System.out.println("Fechando sistema (cadastro abortado");
                     return;
@@ -120,6 +127,8 @@ public class CofreDigital {
             this.loopAutenticacao();
             this.loopSistema();
         }
+
+        this.registrador.fazerRegistro(EnumRegistro.SISTEMA_ENCERRADO);
     }
 
     private void loopAutenticacao() {
@@ -135,15 +144,20 @@ public class CofreDigital {
     private void loopSistema() {
         boolean sair = false;
         while (!sair) {
+            this.registrador.fazerRegistro(EnumRegistro.TELA_PRINCIPAL, this.usuario.loginName);
+
             Operacao operacao = InterfaceTerminal.menuPrincipal(this.usuario);
             switch (operacao) {
                 case CADASTRAR_NOVO_USUARIO:
+                    this.registrador.fazerRegistro(EnumRegistro.MENU_1_SELECIONADO, this.usuario.loginName);
                     this.cadastrarNovoUsuario();
                     break;
                 case CONSULTAR_PASTA:
+                    this.registrador.fazerRegistro(EnumRegistro.MENU_2_SELECIONADO, this.usuario.loginName);
                     this.consultarPasta();
                     break;
                 case SAIR_SISTEMA:
+                    this.registrador.fazerRegistro(EnumRegistro.MENU_3_SELECIONADO, this.usuario.loginName);
                     sair = this.processarSaida();
             }
         }
@@ -153,11 +167,16 @@ public class CofreDigital {
 
     private void cadastrarNovoUsuario() {
         String erro = "";
+        this.registrador.fazerRegistro(EnumRegistro.TELA_CADASTRO, this.usuario.loginName);
+
         while (true) {
-            FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario, erro);
+            FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario, erro, registrador);
             if (form == null) {
                 // cadastro abortado
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_VOLTAR_CADASTRO_SELECIONADO);
                 break;
+            } else {
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_CADASTRO_SELECIONADO);
             }
             // pegando o certificado
             Certificate cert;
@@ -167,9 +186,13 @@ public class CofreDigital {
                 certInfo = CertificadoInfo.fromCertificado(cert);
                 if (InterfaceTerminal.verificarCertificadoInvalido(certInfo)) {
                     // cadastro recusado
+                    this.registrador.fazerRegistro(EnumRegistro.CONFIRMACAO_DADOS_REJEITADA, usuario.loginName);
                     continue;
+                } else {
+                    this.registrador.fazerRegistro(EnumRegistro.CONFIRMACAO_DADOS_ACEITA, usuario.loginName);
                 }
             } catch (Exception e) {
+                this.registrador.fazerRegistro(EnumRegistro.CAMINHO_CERTIFICADO_INVALIDO, usuario.loginName);
                 erro = "Certificado invalido (" + e.getMessage() + ")";
                 continue;
             }
@@ -179,6 +202,7 @@ public class CofreDigital {
             try {
                 chavePrivadaBytes = Restaurador.restauraChavePrivadaBytes(form.pathPk);
             } catch (Exception e) {
+                this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_CAMINHO_INVALIDO, usuario.loginName);
                 erro = "Chave privada invalida (" + e.getMessage() + ")";
                 continue;
             }
@@ -223,15 +247,18 @@ public class CofreDigital {
                         usuario.fraseSecreta
                 );
             } catch (Exception e) {
+                this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_FRASE_INVALIDA, usuario.loginName);
                 erro = "Frase secreta inválida (" + e.getMessage() + ")";
                 continue;
             }
             try {       // VALIDANDO CHAVES
                 if (!Restaurador.testaChaves(privk, pubk)) {
+                    this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_ASSINATURA_INVALIDA, usuario.loginName);
                     erro = "Chaves privada e pública não combinam";
                     continue;
                 }
             } catch (Exception e) {
+                this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_ASSINATURA_INVALIDA, usuario.loginName);
                 erro = "Erro ao testar chaves (" + e.getMessage() + ")";
                 continue;
             }
@@ -252,32 +279,48 @@ public class CofreDigital {
         String erro = "";
         ArrayList<LinhaIndice> linhas = null;
         int r = -2;
+
+        this.registrador.fazerRegistro(EnumRegistro.TELA_CONSULTA, this.usuario.loginName);
         while (r != -1) {   // -1 = sair
             r = InterfaceTerminal.consultarPasta(this.usuario, this.diretorio, linhas, erro);
             if (r == 0) {   // mostrar pasta
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_LISTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
+
                 // TODO: validar frase secreta do usuario (ue ja nao foi verificada??)
 
+                // TODO: caminho da pasta invalido para login_name ???????
+
                 try {
-                    this.diretorio.init(this.infoAdmin.getPrivateKey(), this.infoAdmin.getPublicKey());
+                    this.diretorio.init(
+                            this.infoAdmin.getPrivateKey(),
+                            this.infoAdmin.getPublicKey(),
+                            this.registrador,
+                            this.usuario
+                    );
                 } catch (Exception e) {
+                    // TODOS OS REGISTROS FORAM DEVIDAMENTE FEITOS
                     erro = "ERRO INICIALIZANDO DIRETORIO (" + e.getMessage() + ")";
                     continue;
                 }
                 linhas = this.diretorio.getLinhasUsuario(this.usuario);
+                this.registrador.fazerRegistro(EnumRegistro.LISTA_ARQUIVOS_PRESENTE, this.usuario.loginName);
+
             } else if (r > 0 && linhas != null) {
                 LinhaIndice linha = linhas.get(r - 1);
-
                 // verificando se o arquivo eh do usuario
                 if (!linha.usuario.equals(this.usuario.loginName)) {
+                    this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_ACESSO_NEGADO, this.usuario.loginName, linha.codigo);
                     erro = "ERRO ACESSANDO ARQUIVO (ARQUIVO NAO PERTENCE AO USUARIO)";
                     continue;
+                } else {
+                    this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_ACESSO_PERMITIDO, this.usuario.loginName, linha.codigo);
                 }
-
                 // abrindo arquivo
                 Arquivo arq;
                 try {
                     arq = new Arquivo(linha.codigo);
                 } catch (Exception e) {
+                    // NAO EXISTE MENSAGEM DE ERRO PARA ESSE TIPO DE FALHA (FALTA OS ARQUIVOS .env, .asd, ...)
                     erro = "ERRO ABRINDO ARQUIVO (" + e.getMessage() + ")";
                     continue;
                 }
@@ -292,22 +335,29 @@ public class CofreDigital {
                                 this.usuario.fraseSecreta
                         );
                     } catch (Exception e) {
+                        // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
                         erro = "ERRO RESTAURANDO CHAVE PRIVADA (" + e.getMessage() + ")";
                         continue;
                     }
                     try {
                         pubKey = Restaurador.getChavePublica(this.usuario.chaveiro.chavePublicaPem);
                     } catch (Exception e) {
+                        // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
                         erro = "ERRO RESTAURANDO CHAVE PUBLICA (" + e.getMessage() + ")";
                         continue;
                     }
 
                     conteudo = arq.decriptaArquivo(pk);
+                    this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_DECRIPTADO_SUCESSO, this.usuario.loginName, linha.codigo);
                     if (!arq.autenticidadeArquivo(conteudo, pubKey)) {
+                        this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_VALIDADO_FALHA, this.usuario.loginName, linha.codigo);
                         erro = "ERRO VALIDANDO ASSINATURA (ASSINATURA INVALIDA)";
                         continue;
+                    } else {
+                        this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_VALIDADO_SUCESSO, this.usuario.loginName, linha.codigo);
                     }
                 } catch (Exception e) {
+                    this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_DECRIPTADO_FALHA, this.usuario.loginName, linha.codigo);
                     erro = "ERRO DECRIPTANDO ARQUIVO (" + e.getMessage() + ")";
                     continue;
                 }
@@ -318,23 +368,28 @@ public class CofreDigital {
                     // utilizando o erro como mensagem de sucesso... :P
                     erro = "ARQUIVO (" + linha.nomeArquivo + ") SALVO COM SUCESSO";
                 } catch (Exception e) {
+                    // SEM MENSAGEM DE ERRO PARA ESSE TIPO DE FALHA
                     erro = "ERRO SALVANDO ARQUIVO DECRIPTADO (" + e.getMessage() + ")";
                 }
-
+            } else {
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_VOLTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
             }
         }
-
     }
 
     /** retorna true se deve encerrar. altera .fecharSistema se deve fechar tudo */
     private boolean processarSaida() {
+        this.registrador.fazerRegistro(EnumRegistro.TELA_SAIDA, this.usuario.loginName);
         switch (InterfaceTerminal.telaSaida(this.usuario)) {
             case SAIR_SISTEMA:
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_ENCERRAR_SISTEMA_SELECIONADO, this.usuario.loginName);
                 this.fecharSistema = true;
                 return true;
             case ENCERRAR_SESSAO:
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_ENCERRAR_SESSAO_SELECIONADO, this.usuario.loginName);
                 return true;
             case RETORNAR_MENU:
+                this.registrador.fazerRegistro(EnumRegistro.BOTAO_VOLTAR_SAIR_MENU_SELECIONADO, this.usuario.loginName);
                 return false;
         }
         return false;   // nunca deve cair aqui (espero)

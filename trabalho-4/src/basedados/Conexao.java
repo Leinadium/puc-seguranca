@@ -5,6 +5,8 @@ import basedados.modelos.Grupo;
 import basedados.modelos.Usuario;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 
@@ -19,6 +21,8 @@ public class Conexao {
         }
         return instance;
     }
+
+    private Conexao() {}
 
     static final String createUsuario = "CREATE TABLE IF NOT EXISTS usuarios (\n"
             + "	uid INTEGER PRIMARY KEY AUTOINCREMENT,\n"
@@ -50,11 +54,11 @@ public class Conexao {
             + ");";
 
     static final String createRegistro = "CREATE TABLE IF NOT EXISTS registros (\n"
-            + "   uid INTEGER NOT NULL,\n"
+            + "   rid INTEGER PRIMARY KEY AUTOINCREMENT,\n"
             + "   mid INTEGER NOT NULL,\n"
-            + "   info1 TEXT, \n"
-            + "   info2 TEXT, \n"
-            + "   info3 TEXT \n"
+            + "   quando TEXT,\n"
+            + "   info1 TEXT,\n"
+            + "   info2 TEXT\n"
             + ");";
 
     public void criar() {
@@ -66,6 +70,7 @@ public class Conexao {
             stmt.execute(createGrupo);
             stmt.execute(createMensagem);
             stmt.execute(createRegistro);
+            this.preencheMensagens();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -231,6 +236,125 @@ public class Conexao {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    private void setMensagem(int mid, String texto) throws SQLException {
+        String sql = "INSERT INTO mensagens (mid, texto) VALUES (?, ?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, mid);
+        pstmt.setString(2, texto);
+        pstmt.executeUpdate();
+    }
+
+    private void preencheMensagens() throws SQLException {
+        // primeiro, verifica se tem alguma mensagem ja no banco. se tiver, retorna logo
+        String sql = "SELECT mid FROM mensagens";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        if (rs.next()) { return; }
+        setMensagem(1001, "Sistema iniciado");
+        setMensagem(1002, "Sistema encerrado");
+        setMensagem(1003, "Sessão iniciada para %s");
+        setMensagem(1004, "Sessão encerrada para %s");
+        setMensagem(2001, "Autenticação etapa 1 iniciada");
+        setMensagem(2002, "Autenticação etapa 1 encerrada");
+        setMensagem(2003, "Login name %s identificado com acesso liberado");
+        setMensagem(2004, "Login name %s identificado com acesso bloqueado");
+        setMensagem(3001, "Autenticação etapa 2 iniciada para %s");
+        setMensagem(3002, "Autenticação etapa 2 encerrada para %s");
+        setMensagem(3003, "Senha pessoal verificada positivamente para %s");
+        setMensagem(3004, "Primeiro erro da senha pessoal contabilizado para %s");
+        setMensagem(3005, "Segundo erro da senha pessoal contabilizado para %s");
+        setMensagem(3006, "Terceiro erro da senha pessoal contabilizado para %s");
+        setMensagem(3007, "Acesso do usuario %s bloqueado pela autenticação etapa 2");
+        setMensagem(4001, "Autenticação etapa 3 iniciada para %s");
+        setMensagem(4002, "Autenticação etapa 3 encerrada para %s");
+        setMensagem(4003, "Token verificado positivamente para %s");
+        setMensagem(4004, "Primeiro erro de token contabilizado para %s");
+        setMensagem(4005, "segundo erro de token contabilizado para %s");
+        setMensagem(4006, "Terceiro erro de token contabilizado para %s");
+        setMensagem(4007, "Acesso do usuario %s bloqueado pela autenticação etapa 3");
+        setMensagem(5001, "Tela principal apresentada para %s");
+        setMensagem(5002, "Opção 1 do menu selecionada por %s");
+        setMensagem(5003, "Opção 2 do menu selecionada por %s");
+        setMensagem(5004, "Opção 3 do menu selecionada por %s");
+        setMensagem(6001, "Tela de cadastro apresentada para %s");
+        setMensagem(6002, "Botão cadastrar pressionado por %s");
+        setMensagem(6003, "Senha pessoal inválida fornecida por %s");
+        setMensagem(6004, "Caminho do certificado digital inválido fornecido por %s");
+        setMensagem(6005, "Chave privada verificada negativamente para %s (caminho inválido)");
+        setMensagem(6006, "Chave privada verificada negativamente para %s (frase secreta inválida)");
+        setMensagem(6007 ,"Chave privada verificada negativamente para %s (assinatura digital inválida)");
+        setMensagem(6008, "Confirmação de dados aceita por %s");
+        setMensagem(6009, "Confirmação de dados rejeitada por %s");
+        setMensagem(6010, "Botão voltar de cadastro para o menu principal pressionado por %s");
+        setMensagem(7001, "tela de consulta de arquivos secretos apresentada por %s");
+        setMensagem(7002, "Botão voltar de consulta para o menu principal pressionado por %s");
+        setMensagem(7003, "Botão Listar de consulta pressionado por %s");
+        setMensagem(7004, "Caminho de pasta inválido fornecido por %s");
+        setMensagem(7005, "Arquivo de índice decriptado com sucesso para %s");
+        setMensagem(7006, "Arquivo de índice verificado (integridade e autenticidade) com sucesso para %s");
+        setMensagem(7007, "Falha na drcriptação do arquivo de índice para %s");
+        setMensagem(7008, "Falha na verificação (integridade e autenticidade) do arquivo de índice para %s");
+        setMensagem(7009, "Lista de arquivos presentes no índice apresentada para %s");
+        setMensagem(7010, "Arquivo %s selecionado por %s para decriptação");
+        setMensagem(7011, "Acesso permitido ao arquivo %s para %s");
+        setMensagem(7012, "Acesso negado  ao arquivo %s para %s");
+        setMensagem(7013, "Arquivo %s decriptado com sucesso para %s");
+        setMensagem(7014, "Arquivo %s verificado (integridade e autenticidade) com sucesso para %s");
+        setMensagem(7015, "Falha na decriptação do arquivo %s para %s");
+        setMensagem(7016, "Falha na verificação (integridade e autenticada) do arquivo %s para %s");
+        setMensagem(8001, "Tela de saída apresentada por %s");
+        setMensagem(8002, "Botão encerrar sessão pressionado por %s");
+        setMensagem(8003, "Botão encerrar sistema pressionado por %s");
+        setMensagem(8004, "Botão voltar de sair para o menu principal presionado por %s");
+    }
+
+    public void setRegistro(int codigo, String nome, String arquivo) {
+        String sql = "INSERT INTO registros (mid, quando, info1, info2) VALUES (?, ?, ?, ?)";
+        try {
+            // https://stackoverflow.com/questions/46712635/what-is-the-correct-way-to-insert-datetimes-into-sqlite-from-java
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            String ts = sdf.format(timestamp);
+
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, codigo);
+            pstmt.setString(2, ts);
+            pstmt.setString(3, nome);
+            pstmt.setString(4, arquivo);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erro ao guardar registro: " + e.getMessage());
+        }
+    }
+
+    public ArrayList<String> getTodosRegistros() {
+        // coleta todos os registros, ordenando pelo campo "quando"
+        String sql = "SELECT r.rid, m.texto, r.quando, r.info1, r.info2 " +
+                     "FROM registros r, mensagens m " +
+                     "WHERE m.mid = r.mid " +
+                     "ORDER BY quando DESC";
+
+        ArrayList<String> ret = new ArrayList<>();
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                int rid = rs.getInt("rid");
+                String texto = rs.getString("texto");
+                String quando = rs.getString("quando");
+                String info1 = rs.getString("info1");
+                String info2 = rs.getString("info2");
+
+                String textoPreenchido = String.format(texto, info1, info2);
+                String s = String.format("(id:%d)[%s] %s", rid, quando, textoPreenchido);
+                ret.add(s);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return ret;
     }
 
     public boolean usuarioEstaBloqueado(Usuario usuario) {

@@ -4,6 +4,8 @@ import basedados.modelos.Usuario;
 import diretorio.CertificadoInfo;
 import diretorio.Diretorio;
 import diretorio.LinhaIndice;
+import registro.EnumRegistro;
+import registro.Registrador;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -89,7 +91,7 @@ public class InterfaceTerminal {
         return null;
     }
 
-    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario, String erro) {
+    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario, String erro, Registrador registrador) {
         FormularioCadastro formularioCadastro = new FormularioCadastro();
         Scanner scanner = new Scanner(System.in);
 
@@ -182,7 +184,8 @@ public class InterfaceTerminal {
                     String x = validarSenha(formularioCadastro.senhaPessoal);
                     if (x != null) {
                         erro = x;
-                        formularioCadastro.senhaPessoal = "";
+                        formularioCadastro.senhaPessoal = "";;
+                        registrador.fazerRegistro(EnumRegistro.SENHA_PESSOAL_INVALIDA, usuario == null ? "adminInicial" : usuario.loginName);
                     } else {
                         erro = "";
                         campoAtual++;
@@ -318,5 +321,14 @@ public class InterfaceTerminal {
                     break;
             }
         }
+    }
+
+    public static void mostrarRegistros(ArrayList<String> registros) {
+        limparTela();
+        System.out.println("=== REGISTROS DE ACESSO ===");
+        for (String registro : registros) {
+            System.out.println(registro);
+        }
+        System.out.println("===========================");
     }
 }
