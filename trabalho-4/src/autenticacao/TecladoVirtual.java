@@ -11,9 +11,8 @@ public class TecladoVirtual {
         teclado.lerSenha(senhaCorretaBCrypt);
     }
 
-    private static Scanner scanner = new Scanner(System.in);
-    private ArrayList<Integer> botoes = new ArrayList<Integer>();
-    private ArrayList<ArrayList<Integer>> senhaInserida = new ArrayList<>();
+    private final ArrayList<Integer> botoes;
+    private final ArrayList<ArrayList<Integer>> senhaInserida = new ArrayList<>();
 
     public TecladoVirtual() {
         this.botoes = new ArrayList<>();
@@ -35,48 +34,50 @@ public class TecladoVirtual {
         return false;
     }
 
-    public String lerSenha(String senhaCorreta) {
+    public boolean lerSenha(String senhaCorreta) {
         Scanner scanner = new Scanner(System.in);
-        List<Integer> numeros = new ArrayList<>();
-        for (int i = 0; i < 10; i += 2) {
+        for (int i = 0; i < 10; i += 1) {
             Collections.shuffle(this.botoes);
-            int opcao = escolherBotao(scanner, this.botoes);
-            numeros.add(this.botoes.get(opcao));
-            Collections.shuffle(this.botoes);
-            opcao = escolherBotao(scanner, this.botoes);
-            numeros.add(this.botoes.get(opcao));
+            boolean enviou = escolherBotao(scanner, this.botoes,i >= 8);
+            if (enviou){
+                break;
+            }
         }
         String[] todasSenhas = gerarTodasSenhas(senhaInserida);
-        System.out.println("Todas as senhas: " + Arrays.toString(todasSenhas));
 
-        // String[] todasSenhasHash = hashTodasSenhas(todasSenhas);
-        // System.out.println("Todas as senhas hash: " + Arrays.toString(todasSenhasHash));
-
-        System.out.println("SALVE");
         boolean senhasIguais = comparaSenhas(senhaCorreta, todasSenhas);
         if (senhasIguais) {
             System.out.println("Senha correta!");
         } else {
             System.out.println("Senha incorreta!");
         }
-        return senhaCorreta;
+        return senhasIguais;
     }
 
-    private int escolherBotao(Scanner scanner, ArrayList<Integer> botoes) {
+    private boolean escolherBotao(Scanner scanner, ArrayList<Integer> botoes, boolean podeEnviar) {
         for (int i = 0; i < 5; i++) {
             System.out.printf("%d: [%d,%d]%n", i + 1, botoes.get(i * 2), botoes.get(i * 2 + 1));
         }
         int opcao;
         do {
             System.out.print("Digite o número do botão: ");
-            opcao = scanner.nextInt();
+            String opcaoString = scanner.nextLine();
+            if (opcaoString.equals("")) {
+                if (podeEnviar) {
+                    return true;
+                }
+                opcao = -1;
+            }
+            else {
+                opcao = Integer.parseInt(opcaoString);
+            }
         } while (opcao < 1 || opcao > 5);
         int botaoSelecionado = opcao - 1;
         int valor1 = botoes.get(botaoSelecionado * 2);
         int valor2 = botoes.get(botaoSelecionado * 2 + 1);
 
         this.senhaInserida.add(new ArrayList<>(Arrays.asList(valor1, valor2)));
-        return opcao - 1;
+        return false;
     }
 
     private String[] gerarTodasSenhas(ArrayList<ArrayList<Integer>> senhaInserida) {
@@ -96,8 +97,6 @@ public class TecladoVirtual {
             }
             todasSenhas[i] = senha.toString();
         }
-        System.out.println("Numero de senhas geradas: " + numCombinacoes);
-        System.out.println("Todas as senhas: " + Arrays.toString(todasSenhas));
 
         return todasSenhas;
     }
