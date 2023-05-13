@@ -164,12 +164,17 @@ public class Conexao {
         pstmt.setString(1, loginName);
         ResultSet rs = pstmt.executeQuery();
 
+
+
         if (rs.next()) {
+            // pega a data de bloqueio de rs.getLong(bloqueado)
+            java.util.Date bloqueado = new java.util.Date(rs.getLong("bloqueado"));
+
             usuario.uid = rs.getInt("uid");
             usuario.loginName = rs.getString("loginName");
             usuario.nome = rs.getString("nome");
             usuario.numAcessos = rs.getInt("numAcessos");
-            usuario.bloqueado = rs.getDate("bloqueado");
+            usuario.bloqueado = bloqueado;
             usuario.fraseSecreta = rs.getString("fraseSecreta");
             usuario.senha = rs.getString("senha");
             usuario.semente = rs.getBytes("semente");
@@ -208,7 +213,7 @@ public class Conexao {
         pstmt.setString(1, usuario.loginName);
         pstmt.setString(2, usuario.nome);
         pstmt.setInt(3, usuario.numAcessos);
-        pstmt.setDate(4, usuario.bloqueado);
+        pstmt.setDate(4, (Date) usuario.bloqueado);
 
         // se o usuario for admin, nao pode salvar a fraseSecreta
         if (!usuario.grupo.nome.equals("administrador")) {
@@ -379,7 +384,32 @@ public class Conexao {
         String sql = "UPDATE usuarios SET bloqueado = ? WHERE uid = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setDate(1, null);     // TODO: salvar hora atual
+            // salva a hora atual
+            pstmt.setDate(1, new java.sql.Date(new java.util.Date().getTime()));
+            pstmt.setInt(2, usuario.uid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public int quantidadeUsuarios() {
+        String sql = "SELECT COUNT(*) FROM usuarios";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
+
+    public void atualizarNumeroAcessos(Usuario usuario) {
+        String sql = "UPDATE usuarios SET numAcessos = ? WHERE uid = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, usuario.numAcessos + 1);
             pstmt.setInt(2, usuario.uid);
             pstmt.executeUpdate();
         } catch (SQLException e) {

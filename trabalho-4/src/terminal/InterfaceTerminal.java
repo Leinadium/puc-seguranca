@@ -96,7 +96,7 @@ public class InterfaceTerminal {
         return null;
     }
 
-    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario, String erro, Registrador registrador) {
+    public static FormularioCadastro mostrarFormularioCadastro(Usuario usuario, String erro, Registrador registrador, int quantidadeUsuarios) {
         FormularioCadastro formularioCadastro = new FormularioCadastro();
         Scanner scanner = new Scanner(System.in);
 
@@ -108,7 +108,7 @@ public class InterfaceTerminal {
             // se for nulo, eh um registro de um admin
             if (usuario != null) {
                 mostrarCabecalho(usuario);
-                System.out.println("\nTotal de acessos: " + usuario.numAcessos);    // TODO: quantidade de usuarios
+                System.out.println("\nTotal de usuários no sistema: " + quantidadeUsuarios);
             }
             System.out.println("\nFormulário de Cadastro:");
             System.out.println("- Caminho do arquivo do certificado digital: " + formularioCadastro.pathCert);
@@ -339,7 +339,7 @@ public class InterfaceTerminal {
 
     /** verifica se o email eh valido */
     public static String loginInicial(String erro) {
-        String nome = ".";
+        String nome;
         final Pattern emailPattern = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
 
         do {

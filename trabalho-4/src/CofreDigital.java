@@ -17,7 +17,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class CofreDigital {
     Diretorio diretorio;
@@ -62,7 +61,7 @@ public class CofreDigital {
             Chaveiro chaveiroAdmin = this.conexao.chaveiroAdmin();
             if (chaveiroAdmin == null) {        // CADASTRO DO ADMIN!!
                 // pegando formulario
-                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "", this.registrador);
+                FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "", this.registrador, 0);
                 if (form == null) {
                     System.out.println("Fechando sistema (cadastro abortado");
                     return;
@@ -88,6 +87,7 @@ public class CofreDigital {
                 admin.bloqueado = null;
                 admin.semente = CriptoToken.geraSemente(form.senhaPessoal);
                 admin.grupo = this.conexao.getGrupo(form.grupo);
+                admin.numAcessos = 0;
                 admin.chaveiro = new Chaveiro();
                 admin.chaveiro.chavePrivadaBytes = chavePrivadaBytes;
                 admin.chaveiro.chavePublicaPem = Restaurador.geraChavePublicaPem(cert.getPublicKey());
@@ -144,7 +144,8 @@ public class CofreDigital {
         }
         this.usuario = usuario;
 
-        // TODO: aumentar o numero de acessos do usuario
+        this.usuario.numAcessos++;
+        this.conexao.atualizarNumeroAcessos(this.usuario);
 
         // se o usuario for admin, this.usuario.fraseSecreta eh nulo, pq eu nao posso salvar a frase secreta do admin
         // pelo menos foi o que eu entendi do enunciado
@@ -182,8 +183,10 @@ public class CofreDigital {
         String erro = "";
         this.registrador.fazerRegistro(EnumRegistro.TELA_CADASTRO, this.usuario.loginName);
 
+        // pegando a quantidade de usuarios no sistema
+        int quantidadeUsuarios = conexao.quantidadeUsuarios();
         while (true) {
-            FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario, erro, registrador);
+            FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(this.usuario, erro, registrador, quantidadeUsuarios);
             if (form == null) {
                 // cadastro abortado
                 this.registrador.fazerRegistro(EnumRegistro.BOTAO_VOLTAR_CADASTRO_SELECIONADO);
