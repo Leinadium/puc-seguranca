@@ -68,15 +68,26 @@ public class CofreDigital {
                 }
 
                 // pegando certificado
-                Certificate cert = Restaurador.restauraCertificado(form.pathCert);
-                CertificadoInfo certInfo = CertificadoInfo.fromCertificado(cert);
+                Certificate cert;
+                CertificadoInfo certInfo;
+                try {
+                    cert = Restaurador.restauraCertificado(form.pathCert);
+                    certInfo = CertificadoInfo.fromCertificado(cert);
+                } catch (Exception e) {
+                    throw new Exception("Erro ao restaurar certificado. Possivelmente arquivo não encontrado ou inválido");
+                }
                 if (InterfaceTerminal.verificarCertificadoInvalido(certInfo)) {
                     System.out.println("Fechando sistema (certificado invalido)");
                     return;
                 }
 
                 // pegando bytes da private key
-                byte[] chavePrivadaBytes = Restaurador.restauraChavePrivadaBytes(form.pathPk);
+                byte[] chavePrivadaBytes;
+                try {
+                    chavePrivadaBytes = Restaurador.restauraChavePrivadaBytes(form.pathPk);
+                } catch (Exception e) {
+                    throw new Exception("Não foi possivel restaurar chave privada. Possivelmente arquivo não encontrado");
+                }
 
                 // criando admin
                 Usuario admin = new Usuario();
@@ -93,12 +104,20 @@ public class CofreDigital {
                 admin.chaveiro.chavePublicaPem = Restaurador.geraChavePublicaPem(cert.getPublicKey());
 
                 // validando (sera jogada uma excecao se der errado)
-                Restaurador.restauraChavePrivada(
-                        admin.chaveiro.chavePrivadaBytes,
-                        form.fraseSecreta
-                );
+                try {
+                    Restaurador.restauraChavePrivada(
+                            admin.chaveiro.chavePrivadaBytes,
+                            form.fraseSecreta
+                    );
+                } catch (Exception e) {
+                    throw new Exception("Não foi possivel decodificar chave privada (" + e.getMessage() + ")");
+                }
 
-                this.conexao.setUsuario(admin);
+                try {
+                    this.conexao.setUsuario(admin);
+                } catch (Exception e) {
+                    throw new Exception("Não foi possivel armazenar o admin no banco (" + e.getMessage() + ")");
+                }
 
                 // armazenando informacoes do adm
                 this.infoAdmin.set(
@@ -323,6 +342,8 @@ public class CofreDigital {
             } else if (r > 0 && linhas != null) {
                 LinhaIndice linha = linhas.get(r - 1);
                 // verificando se o arquivo eh do usuario
+                this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_SELECIONADO, this.usuario.loginName, linha.codigo);
+
                 if (!linha.usuario.equals(this.usuario.loginName)) {
                     this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_ACESSO_NEGADO, this.usuario.loginName, linha.codigo);
                     erro = "ERRO ACESSANDO ARQUIVO (ARQUIVO NAO PERTENCE AO USUARIO)";

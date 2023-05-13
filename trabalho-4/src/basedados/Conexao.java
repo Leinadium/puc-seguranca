@@ -299,13 +299,13 @@ public class Conexao {
         setMensagem(6008, "Confirmação de dados aceita por %s");
         setMensagem(6009, "Confirmação de dados rejeitada por %s");
         setMensagem(6010, "Botão voltar de cadastro para o menu principal pressionado por %s");
-        setMensagem(7001, "tela de consulta de arquivos secretos apresentada por %s");
+        setMensagem(7001, "Tela de consulta de arquivos secretos apresentada por %s");
         setMensagem(7002, "Botão voltar de consulta para o menu principal pressionado por %s");
         setMensagem(7003, "Botão Listar de consulta pressionado por %s");
         setMensagem(7004, "Caminho de pasta inválido fornecido por %s");
         setMensagem(7005, "Arquivo de índice decriptado com sucesso para %s");
         setMensagem(7006, "Arquivo de índice verificado (integridade e autenticidade) com sucesso para %s");
-        setMensagem(7007, "Falha na drcriptação do arquivo de índice para %s");
+        setMensagem(7007, "Falha na decriptação do arquivo de índice para %s");
         setMensagem(7008, "Falha na verificação (integridade e autenticidade) do arquivo de índice para %s");
         setMensagem(7009, "Lista de arquivos presentes no índice apresentada para %s");
         setMensagem(7010, "Arquivo %s selecionado por %s para decriptação");
@@ -377,10 +377,6 @@ public class Conexao {
         cal.setTime(usuario.bloqueado);
         cal.add(Calendar.MINUTE, 2);
         java.util.Date data = cal.getTime();
-
-//        System.out.println("data: " + data);
-//        System.out.println("agora: " + new java.util.Date());
-//        System.out.println(data.after(new java.util.Date()));
 
         return data.after(new java.util.Date());
     }

@@ -133,7 +133,7 @@ public class InterfaceTerminal {
 
             switch (campoAtual) {
                 case 0:
-                    System.out.println("\nDigite o caminho para o certificado digital ou SAIR: ");
+                    System.out.println("\nDigite o caminho para o certificado digital: ");
                     formularioCadastro.pathCert = scanner.nextLine();
                     if (formularioCadastro.pathCert.length() > 255) {
                         erro = "O caminho do certificado não pode ter mais de 255 caracteres!";
@@ -144,7 +144,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 1:
-                    System.out.println("\nDigite o caminho para a chave privada do usuário ou SAIR:");
+                    System.out.println("\nDigite o caminho para a chave privada do usuário:");
                     formularioCadastro.pathPk = scanner.nextLine();
                     if (formularioCadastro.pathPk.length() > 255) {
                         erro = "O caminho da chave privada não pode ter mais de 255 caracteres!";
@@ -155,7 +155,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 2:
-                    System.out.println("\nDigite a frase secreta do usuário ou SAIR:");
+                    System.out.println("\nDigite a frase secreta do usuário:");
                     formularioCadastro.fraseSecreta = scanner.nextLine();
                     if (formularioCadastro.senhaPessoal.length() > 255) {
                         erro = "A senha secreta não pode ter mais de 255 caracteres!";
@@ -170,7 +170,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 3:
-                    System.out.println("\nDigite o grupo do usuário ([U]ser, [A]dministrador) ou SAIR:");
+                    System.out.println("\nDigite o grupo do usuário ([U]ser, [A]dministrador): ");
                     formularioCadastro.grupo = scanner.nextLine();
                     String grupo = formularioCadastro.grupo.toLowerCase();
                     if (grupo.equals("u") || grupo.equals("usuario")) {
