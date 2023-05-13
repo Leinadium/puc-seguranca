@@ -1,5 +1,6 @@
 package autenticacao;
 import criptografia.CriptoSenha;
+import terminal.InterfaceTerminal;
 
 import java.util.*;
 
@@ -24,28 +25,44 @@ public class TecladoVirtual {
         return false;
     }
 
-    public boolean lerSenha(String senhaCorreta) {
+    public boolean lerSenha(String senhaCorreta, int tentativasRestantes) {
         Scanner scanner = new Scanner(System.in);
 
         for (int i = 0; i < 10; i += 1) {
             Collections.shuffle(this.botoes);
-            boolean enviou = escolherBotao(scanner, this.botoes,i >= 8);
+            boolean enviou = escolherBotao(scanner, this.botoes,i >= 8, i, tentativasRestantes);
             if (enviou){
                 break;
             }
         }
         String[] todasSenhas = gerarTodasSenhas(senhaInserida);
 
+        System.out.println("Carregando...");
+
         return comparaSenhas(senhaCorreta, todasSenhas);
     }
 
-    private boolean escolherBotao(Scanner scanner, ArrayList<Integer> botoes, boolean podeEnviar) {
+    private boolean escolherBotao(Scanner scanner, ArrayList<Integer> botoes, boolean podeEnviar, int digitados, int tentativasRestantes) {
+        InterfaceTerminal.limparTela();
+        System.out.println("===========================");
+        // builda os asteriscos
+        StringBuilder asteriscos = new StringBuilder();
+        for (int i = 0; i < digitados; i++) {
+            asteriscos.append("*");
+        }
+        // https://stackoverflow.com/questions/2255500/can-i-multiply-strings-in-java-to-repeat-sequences
+        System.out.println("Digite a sua senha: " + asteriscos);
+        if (tentativasRestantes > 0) {
+            System.out.println("Tentativas restantes: " + (3 - tentativasRestantes));
+        }
+
+
         for (int i = 0; i < 5; i++) {
-            System.out.printf("%d: [%d,%d]%n", i + 1, botoes.get(i * 2), botoes.get(i * 2 + 1));
+            System.out.printf("%d: [%d,%d]\n", i + 1, botoes.get(i * 2), botoes.get(i * 2 + 1));
         }
         int opcao;
         do {
-            System.out.print("Digite o número do botão: ");
+            System.out.print("\nDigite o número do botão: ");
             String opcaoString = scanner.nextLine();
             if (opcaoString.equals("")) {
                 if (podeEnviar) {
@@ -54,7 +71,11 @@ public class TecladoVirtual {
                 opcao = -1;
             }
             else {
-                opcao = Integer.parseInt(opcaoString);
+                try {
+                    opcao = Integer.parseInt(opcaoString);
+                } catch (NumberFormatException e) {
+                    opcao = -1;
+                }
             }
         } while (opcao < 1 || opcao > 5);
         int botaoSelecionado = opcao - 1;

@@ -1,4 +1,3 @@
-import autenticacao.Login;
 import criptografia.CriptoSenha;
 import basedados.modelos.Chaveiro;
 import basedados.modelos.Usuario;
@@ -11,6 +10,7 @@ import registro.EnumRegistro;
 import terminal.FormularioCadastro;
 import terminal.InterfaceTerminal;
 import terminal.Operacao;
+import autenticacao.Login;
 
 import java.io.FileOutputStream;
 import java.security.PrivateKey;
@@ -63,7 +63,7 @@ public class CofreDigital {
                 // pegando formulario
                 FormularioCadastro form = InterfaceTerminal.mostrarFormularioCadastro(null, "", this.registrador, 0);
                 if (form == null) {
-                    System.out.println("Fechando sistema (cadastro abortado");
+                    System.out.println("Fechando sistema (cadastro abortado)");
                     return;
                 }
 
@@ -139,8 +139,13 @@ public class CofreDigital {
 
     private void loopAutenticacao() {
         Usuario usuario = null;
+        String erro = null;
+
         while (usuario == null) {
-            usuario = Login.login();
+            usuario = Login.login(erro);
+            if (usuario == null) {
+                erro = "Usuario bloqueado";
+            }
         }
         this.usuario = usuario;
 
@@ -309,7 +314,7 @@ public class CofreDigital {
                     );
                 } catch (Exception e) {
                     // TODOS OS REGISTROS FORAM DEVIDAMENTE FEITOS
-                    erro = "ERRO INICIALIZANDO DIRETORIO (" + e.getMessage() + ")";
+                    erro = "ERRO INICIALIZANDO DIRETORIO";
                     continue;
                 }
                 linhas = this.diretorio.getLinhasUsuario(this.usuario);
@@ -331,7 +336,7 @@ public class CofreDigital {
                     arq = new Arquivo(linha.codigo);
                 } catch (Exception e) {
                     // NAO EXISTE MENSAGEM DE ERRO PARA ESSE TIPO DE FALHA (FALTA OS ARQUIVOS .env, .asd, ...)
-                    erro = "ERRO ABRINDO ARQUIVO (" + e.getMessage() + ")";
+                    erro = "ERRO ABRINDO ARQUIVO";
                     continue;
                 }
                 // decriptando e validando
@@ -348,14 +353,14 @@ public class CofreDigital {
                         // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
                         // OBS: MENTIRA, TEM SIM, ELE PEDIU
                         this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_FRASE_INVALIDA);
-                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (CHAVE INVALIDA?) (" + e.getMessage() + ")";
+                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (CHAVE INVALIDA?)";
                         continue;
                     }
                     try {
                         pubKey = Restaurador.getChavePublica(this.usuario.chaveiro.chavePublicaPem);
                     } catch (Exception e) {
                         // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
-                        erro = "ERRO RESTAURANDO CHAVE PUBLICA (" + e.getMessage() + ")";
+                        erro = "ERRO RESTAURANDO CHAVE PUBLICA";
                         continue;
                     }
 
@@ -370,7 +375,7 @@ public class CofreDigital {
                     }
                 } catch (Exception e) {
                     this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_DECRIPTADO_FALHA, this.usuario.loginName, linha.codigo);
-                    erro = "ERRO DECRIPTANDO ARQUIVO (" + e.getMessage() + ")";
+                    erro = "ERRO DECRIPTANDO ARQUIVO";
                     continue;
                 }
                 try {
@@ -381,7 +386,7 @@ public class CofreDigital {
                     erro = "ARQUIVO (" + linha.nomeArquivo + ") SALVO COM SUCESSO";
                 } catch (Exception e) {
                     // SEM MENSAGEM DE ERRO PARA ESSE TIPO DE FALHA
-                    erro = "ERRO SALVANDO ARQUIVO DECRIPTADO (" + e.getMessage() + ")";
+                    erro = "ERRO SALVANDO ARQUIVO DECRIPTADO";
                 }
             } else {
                 this.registrador.fazerRegistro(EnumRegistro.BOTAO_VOLTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
@@ -410,28 +415,20 @@ public class CofreDigital {
 
 
 class InfoAdmin {
-
     private String frase;
-
     private byte[] priv;
-
     private String pub;
-
     public void set(String frase, byte[] priv, String pub) {
         this.frase = frase;
         this.priv = priv;
         this.pub = pub;
     }
-
     public PrivateKey getPrivateKey() throws Exception {
         return Restaurador.restauraChavePrivada(this.priv, this.frase);
     }
-
-
     public PublicKey getPublicKey() throws Exception {
         return Restaurador.getChavePublica(this.pub);
     }
-
     public String getFrase() {
         return this.frase;
     }

@@ -8,7 +8,7 @@ import terminal.InterfaceTerminal;
 
 public class Login {
 
-    public static Usuario login() {
+    public static Usuario login(String erro) {
         Conexao conexao;
         Registrador registrador;
         try {
@@ -25,7 +25,6 @@ public class Login {
         // primeira autenticacao
         String nomeLogin;
         Usuario usuario = null;
-        String erro = null;
         do {
             registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_1_INICIADA);
             nomeLogin = InterfaceTerminal.loginInicial(erro);
@@ -37,10 +36,12 @@ public class Login {
                 continue;
             }
             if (conexao.usuarioEstaBloqueado(usuario)) {
-                registrador.fazerRegistro(EnumRegistro.LOGIN_IDENTIFICADO_BLOQUEADO);
+                registrador.fazerRegistro(EnumRegistro.LOGIN_IDENTIFICADO_BLOQUEADO, usuario.loginName);
                 erro = "O acesso do usuário está bloquado";
+                usuario = null;
+                continue;
             } else {
-                registrador.fazerRegistro(EnumRegistro.LOGIN_IDENTIFICADO_LIBERADO);
+                registrador.fazerRegistro(EnumRegistro.LOGIN_IDENTIFICADO_LIBERADO, usuario.loginName);
             }
             registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_1_ENCERRADA);
 
@@ -52,7 +53,7 @@ public class Login {
         int tentativas_senha = 0;
         while (tentativas_senha < 3) {
             TecladoVirtual teclado = new TecladoVirtual();
-            senhaCheck = teclado.lerSenha(usuario.senha);
+            senhaCheck = teclado.lerSenha(usuario.senha, tentativas_senha);
             if (senhaCheck) {
                 registrador.fazerRegistro(EnumRegistro.SENHA_VERIFICADA);
                 System.out.println("Senha correta!");
@@ -65,8 +66,6 @@ public class Login {
                 if (tentativas_senha == 1) { registrador.fazerRegistro(EnumRegistro.SENHA_INVALIDA_1, usuario.loginName); }
                 else if (tentativas_senha == 2) { registrador.fazerRegistro(EnumRegistro.SENHA_INVALIDA_2, usuario.loginName); }
                 else  { registrador.fazerRegistro(EnumRegistro.SENHA_INVALIDA_3, usuario.loginName); }
-
-                System.out.println("Tentativas restantes: " + (3 - tentativas_senha));
             }
         }
         registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_ENCERRADA);

@@ -13,13 +13,13 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class InterfaceTerminal {
-    static void limparTela() {
+    public static void limparTela() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
     static void mostrarCabecalho(Usuario usuario) {
-        System.out.println("\n===============================");
+        System.out.println("===============================");
         System.out.println("Login: " + usuario.loginName);
         System.out.println("Grupo: " + usuario.grupo.nome);
         System.out.println("Nome: " + usuario.nome);
@@ -27,6 +27,7 @@ public class InterfaceTerminal {
 
     public static String pedeFraseAdmin(String erro) {
         Scanner scanner = new Scanner(System.in);
+        limparTela();
         System.out.println("==================================");
         if (!erro.equals("")) {
             System.out.println("Erro: " + erro);
@@ -109,6 +110,8 @@ public class InterfaceTerminal {
             if (usuario != null) {
                 mostrarCabecalho(usuario);
                 System.out.println("\nTotal de usuários no sistema: " + quantidadeUsuarios);
+            } else {
+                System.out.println("===============================");
             }
             System.out.println("\nFormulário de Cadastro:");
             System.out.println("- Caminho do arquivo do certificado digital: " + formularioCadastro.pathCert);
@@ -130,7 +133,7 @@ public class InterfaceTerminal {
 
             switch (campoAtual) {
                 case 0:
-                    System.out.println("\nDigite o caminho para o certificado digital:");
+                    System.out.println("\nDigite o caminho para o certificado digital ou SAIR: ");
                     formularioCadastro.pathCert = scanner.nextLine();
                     if (formularioCadastro.pathCert.length() > 255) {
                         erro = "O caminho do certificado não pode ter mais de 255 caracteres!";
@@ -141,7 +144,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 1:
-                    System.out.println("\nDigite o caminho para a chave privada do usuário:");
+                    System.out.println("\nDigite o caminho para a chave privada do usuário ou SAIR:");
                     formularioCadastro.pathPk = scanner.nextLine();
                     if (formularioCadastro.pathPk.length() > 255) {
                         erro = "O caminho da chave privada não pode ter mais de 255 caracteres!";
@@ -152,7 +155,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 2:
-                    System.out.println("\nDigite a frase secreta do usuário:");
+                    System.out.println("\nDigite a frase secreta do usuário ou SAIR:");
                     formularioCadastro.fraseSecreta = scanner.nextLine();
                     if (formularioCadastro.senhaPessoal.length() > 255) {
                         erro = "A senha secreta não pode ter mais de 255 caracteres!";
@@ -167,7 +170,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 3:
-                    System.out.println("\nDigite o grupo do usuário ([U]ser, [A]dministrador):");
+                    System.out.println("\nDigite o grupo do usuário ([U]ser, [A]dministrador) ou SAIR:");
                     formularioCadastro.grupo = scanner.nextLine();
                     String grupo = formularioCadastro.grupo.toLowerCase();
                     if (grupo.equals("u") || grupo.equals("usuario")) {
@@ -184,7 +187,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 4:
-                    System.out.println("\nDigite a senha pessoal do usuário:");
+                    System.out.println("\nDigite a senha pessoal do usuário ou SAIR:");
                     formularioCadastro.senhaPessoal = scanner.nextLine();
                     String x = validarSenha(formularioCadastro.senhaPessoal);
                     if (x != null) {
@@ -208,7 +211,7 @@ public class InterfaceTerminal {
                     }
                     break;
                 case 6:
-                    System.out.println("\nPressione ENTER para cadastrar ou qualquer outra tecla para cancelar");
+                    System.out.println("\nPressione ENTER para cadastrar ou qualquer outra tecla para cancelar:");
                     String opcao = scanner.nextLine();
                     if (opcao.equals("")) {
                         return formularioCadastro;
@@ -222,6 +225,7 @@ public class InterfaceTerminal {
     /** retorna true se o usuario confirmou, false se deseja voltar atras */
     public static boolean verificarCertificadoInvalido(CertificadoInfo certInfo) {
         limparTela();
+        System.out.println("===================================");
         System.out.println("Certificado encontrado:");
 
         System.out.println(" - Versão: " + certInfo.versao);
@@ -232,7 +236,7 @@ public class InterfaceTerminal {
         System.out.println(" - Sujeito: " + certInfo.nomeSujeito);
         System.out.println(" - Email: " + certInfo.emailSujeito);
 
-        System.out.println("\nPressione ENTER para confirmar ou qualquer outra tecla para cancelar");
+        System.out.println("\nPressione ENTER para confirmar ou qualquer outra tecla para cancelar:");
         Scanner scanner = new Scanner(System.in);
         String opcao = scanner.nextLine();
         return !opcao.equals("");
@@ -344,12 +348,12 @@ public class InterfaceTerminal {
 
         do {
             limparTela();
-            System.out.println("\n===============================");
+            System.out.println("===============================");
             if (erro != null) {
-                System.out.println("\n" + erro);
+                System.out.println("\n(" + erro + ")\n");
             }
 
-            System.out.println("\nDigite o seu nome de usuário: ");
+            System.out.println("Digite o seu nome de usuário: ");
             Scanner scanner = new Scanner(System.in);
             nome = scanner.nextLine();
             if (!emailPattern.matcher(nome).matches()) {

@@ -63,7 +63,7 @@ public class Restaurador {
     }
 
     public static String geraChavePublicaPem(PublicKey chave) throws Exception {
-        PemObject pemObject = new PemObject("RSA PUBLIC KEY", chave.getEncoded());
+        PemObject pemObject = new PemObject("PUBLIC KEY", chave.getEncoded());
         StringWriter stringWriter = new StringWriter();
         PemWriter pemWriter = new PemWriter(stringWriter);
         pemWriter.writeObject(pemObject);

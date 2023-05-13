@@ -325,7 +325,7 @@ public class Conexao {
         String sql = "INSERT INTO registros (mid, quando, info1, info2) VALUES (?, ?, ?, ?)";
         try {
             // https://stackoverflow.com/questions/46712635/what-is-the-correct-way-to-insert-datetimes-into-sqlite-from-java
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             String ts = sdf.format(timestamp);
 
@@ -377,7 +377,12 @@ public class Conexao {
         cal.setTime(usuario.bloqueado);
         cal.add(Calendar.MINUTE, 2);
         java.util.Date data = cal.getTime();
-        return data.before(new java.util.Date());
+
+//        System.out.println("data: " + data);
+//        System.out.println("agora: " + new java.util.Date());
+//        System.out.println(data.after(new java.util.Date()));
+
+        return data.after(new java.util.Date());
     }
 
     public void bloquearUsuario(Usuario usuario) {
