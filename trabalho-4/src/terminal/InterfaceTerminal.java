@@ -10,6 +10,7 @@ import registro.Registrador;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class InterfaceTerminal {
     static void limparTela() {
@@ -55,17 +56,21 @@ public class InterfaceTerminal {
 
 
             Scanner scanner = new Scanner(System.in);
-            opcao = scanner.nextInt();
-            switch (opcao) {
-                case 1:
-                    return isAdmin ? Operacao.CADASTRAR_NOVO_USUARIO : Operacao.CONSULTAR_PASTA;
-                case 2:
-                    return isAdmin ? Operacao.CONSULTAR_PASTA : Operacao.SAIR_SISTEMA;
-                case 3:
-                    if (isAdmin) {
-                        return Operacao.SAIR_SISTEMA;
-                    }
+            try {
+                opcao = scanner.nextInt();
+                switch (opcao) {
+                    case 1:
+                        return isAdmin ? Operacao.CADASTRAR_NOVO_USUARIO : Operacao.CONSULTAR_PASTA;
+                    case 2:
+                        return isAdmin ? Operacao.CONSULTAR_PASTA : Operacao.SAIR_SISTEMA;
+                    case 3:
+                        if (isAdmin) {
+                            return Operacao.SAIR_SISTEMA;
+                        }
 
+                }
+            } catch (Exception e) { // se o usuario digitar algo que nao eh um numero
+                scanner.nextLine();
             }
         }
     }
@@ -103,7 +108,7 @@ public class InterfaceTerminal {
             // se for nulo, eh um registro de um admin
             if (usuario != null) {
                 mostrarCabecalho(usuario);
-                System.out.println("\nTotal de acessos: " + usuario.numAcessos);
+                System.out.println("\nTotal de acessos: " + usuario.numAcessos);    // TODO: quantidade de usuarios
             }
             System.out.println("\nFormulário de Cadastro:");
             System.out.println("- Caminho do arquivo do certificado digital: " + formularioCadastro.pathCert);
@@ -330,5 +335,27 @@ public class InterfaceTerminal {
             System.out.println(registro);
         }
         System.out.println("===========================");
+    }
+
+    /** verifica se o email eh valido */
+    public static String loginInicial(String erro) {
+        String nome = ".";
+        final Pattern emailPattern = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+
+        do {
+            limparTela();
+            System.out.println("\n===============================");
+            if (erro != null) {
+                System.out.println("\n" + erro);
+            }
+
+            System.out.println("\nDigite o seu nome de usuário: ");
+            Scanner scanner = new Scanner(System.in);
+            nome = scanner.nextLine();
+            if (!emailPattern.matcher(nome).matches()) {
+                erro = "O nome de usuário deve ser ume email válido!";
+            }
+        } while (!emailPattern.matcher(nome).matches());
+        return nome;
     }
 }

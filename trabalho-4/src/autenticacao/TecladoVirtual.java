@@ -1,20 +1,18 @@
 package autenticacao;
+import criptografia.CriptoSenha;
+
 import java.util.*;
 
 public class TecladoVirtual {
-
-    private final ArrayList<Integer> botoes;
-    private final ArrayList<ArrayList<Integer>> senhaInserida = new ArrayList<>();
+    final ArrayList<Integer> botoes;
+    final ArrayList<ArrayList<Integer>> senhaInserida = new ArrayList<>();
 
     public TecladoVirtual() {
+        // configura os botoes do teclado
         this.botoes = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             this.botoes.add(i);
         }
-    }
-
-    private boolean comparaDigito(int digitoInserido, int digitoCorreto) {
-        return digitoInserido == digitoCorreto;
     }
 
     private boolean comparaSenhas(String senhaCorreta, String[] todasSenhasHash) {
@@ -29,7 +27,6 @@ public class TecladoVirtual {
     public boolean lerSenha(String senhaCorreta) {
         Scanner scanner = new Scanner(System.in);
 
-
         for (int i = 0; i < 10; i += 1) {
             Collections.shuffle(this.botoes);
             boolean enviou = escolherBotao(scanner, this.botoes,i >= 8);
@@ -39,16 +36,7 @@ public class TecladoVirtual {
         }
         String[] todasSenhas = gerarTodasSenhas(senhaInserida);
 
-        boolean senhasIguais = comparaSenhas(senhaCorreta, todasSenhas);
-
-        if(senhasIguais){
-            System.out.println("Senha correta!");
-        }
-        else{
-            System.out.println("Senha incorreta!");
-        }
-
-        return senhasIguais;
+        return comparaSenhas(senhaCorreta, todasSenhas);
     }
 
     private boolean escolherBotao(Scanner scanner, ArrayList<Integer> botoes, boolean podeEnviar) {

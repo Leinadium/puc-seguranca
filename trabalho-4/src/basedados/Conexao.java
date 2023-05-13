@@ -209,7 +209,13 @@ public class Conexao {
         pstmt.setString(2, usuario.nome);
         pstmt.setInt(3, usuario.numAcessos);
         pstmt.setDate(4, usuario.bloqueado);
-        pstmt.setString(5, usuario.fraseSecreta);
+
+        // se o usuario for admin, nao pode salvar a fraseSecreta
+        if (!usuario.grupo.nome.equals("administrador")) {
+            pstmt.setString(5, usuario.fraseSecreta);
+        } else {
+            pstmt.setString(5, "");
+        }
         pstmt.setString(6, usuario.senha);
         pstmt.setBytes(7, usuario.semente);
         pstmt.setInt(8, usuario.chaveiro.kid);
@@ -373,7 +379,7 @@ public class Conexao {
         String sql = "UPDATE usuarios SET bloqueado = ? WHERE uid = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setDate(1, null);
+            pstmt.setDate(1, null);     // TODO: salvar hora atual
             pstmt.setInt(2, usuario.uid);
             pstmt.executeUpdate();
         } catch (SQLException e) {

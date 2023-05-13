@@ -1,4 +1,4 @@
-package autenticacao;
+package criptografia;
 
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 

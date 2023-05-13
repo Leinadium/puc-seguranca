@@ -1,4 +1,5 @@
-import autenticacao.CriptoSenha;
+import autenticacao.Login;
+import criptografia.CriptoSenha;
 import basedados.modelos.Chaveiro;
 import basedados.modelos.Usuario;
 import criptografia.CriptoToken;
@@ -16,6 +17,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class CofreDigital {
     Diretorio diretorio;
@@ -27,7 +29,11 @@ public class CofreDigital {
     boolean fecharSistema;
 
     public static void main(String[] args) throws Exception {
-        CofreDigital cofre = new CofreDigital("./trabalho-4/Pacote-T4/Files");
+        if (args.length != 1) {
+            System.out.println("Uso: java CofreDigital <diretorio>");
+            System.exit(1);
+        }
+        CofreDigital cofre = new CofreDigital(args[0]);
         cofre.mainFinal();
     }
 
@@ -77,7 +83,7 @@ public class CofreDigital {
                 Usuario admin = new Usuario();
                 admin.loginName = certInfo.emailSujeito;
                 admin.nome = certInfo.nomeSujeito;
-                // usuario.fraseSecreta = form.fraseSecreta;        // NAO PODE SALVAR SENHA DO ADMIN
+                admin.fraseSecreta = form.fraseSecreta;     // o banco nao armazena a frase secreta
                 admin.senha = CriptoSenha.encripta(form.senhaPessoal);
                 admin.bloqueado = null;
                 admin.semente = CriptoToken.geraSemente(form.senhaPessoal);
@@ -132,12 +138,19 @@ public class CofreDigital {
     }
 
     private void loopAutenticacao() {
-        // TODO: autenticacao do usuario
-        try {
-            this.usuario = this.conexao.getUsuario("admin@inf1416.puc-rio.br");
-        } catch (Exception e) {
-            System.out.println("Erro ao pegar usuario: " + e.getMessage());
-            System.exit(1);
+        Usuario usuario = null;
+        while (usuario == null) {
+            usuario = Login.login();
+        }
+        this.usuario = usuario;
+
+        // TODO: aumentar o numero de acessos do usuario
+
+        // se o usuario for admin, this.usuario.fraseSecreta eh nulo, pq eu nao posso salvar a frase secreta do admin
+        // pelo menos foi o que eu entendi do enunciado
+        // entao eu tenho que pegar do adminInfo.fraseSecreta
+        if (this.usuario.grupo.nome.equals("administrador")) {
+            this.usuario.fraseSecreta = this.infoAdmin.getFrase();
         }
     }
 
@@ -269,10 +282,8 @@ public class CofreDigital {
                 erro = "Erro ao gravar usuário (" + e.getMessage() + ")";
                 continue;
             }
-
             break;
         }
-
     }
 
     private void consultarPasta() {
@@ -285,10 +296,6 @@ public class CofreDigital {
             r = InterfaceTerminal.consultarPasta(this.usuario, this.diretorio, linhas, erro);
             if (r == 0) {   // mostrar pasta
                 this.registrador.fazerRegistro(EnumRegistro.BOTAO_LISTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
-
-                // TODO: validar frase secreta do usuario (ue ja nao foi verificada??)
-
-                // TODO: caminho da pasta invalido para login_name ???????
 
                 try {
                     this.diretorio.init(
@@ -336,7 +343,9 @@ public class CofreDigital {
                         );
                     } catch (Exception e) {
                         // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
-                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (" + e.getMessage() + ")";
+                        // OBS: MENTIRA, TEM SIM, ELE PEDIU
+                        this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_FRASE_INVALIDA);
+                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (CHAVE INVALIDA?) (" + e.getMessage() + ")";
                         continue;
                     }
                     try {
@@ -418,5 +427,9 @@ class InfoAdmin {
 
     public PublicKey getPublicKey() throws Exception {
         return Restaurador.getChavePublica(this.pub);
+    }
+
+    public String getFrase() {
+        return this.frase;
     }
 }
