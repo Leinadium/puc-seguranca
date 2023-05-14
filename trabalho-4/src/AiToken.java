@@ -1,6 +1,7 @@
 import autenticacao.ArquivoTexto;
 import autenticacao.GeradorToken;
 import autenticacao.TecladoVirtual;
+import criptografia.CriptoToken;
 import terminal.InterfaceTerminal;
 
 import java.util.Date;
@@ -12,14 +13,16 @@ public class AiToken {
     public static void main(String[] args) throws Exception {
         ArquivoTexto at = ArquivoTexto.recuperaArquivo();
 
-        boolean senhaCorreta = false;
-        while (!senhaCorreta) {
+        String senhaCorreta = null;
+        while (senhaCorreta == null) {
             TecladoVirtual tecladoVirtual = new TecladoVirtual();
             senhaCorreta = tecladoVirtual.lerSenha(at.senhaBCrypt, -1);
         }
 
+        byte[] semente = CriptoToken.decriptaSemente(senhaCorreta, at.semente);
+
         long minutoAtual = new Date().getTime() / 60000;
-        int token = GeradorToken.geraToken(at.semente, minutoAtual);
+        int token = GeradorToken.geraToken(semente, minutoAtual);
 
         InterfaceTerminal.limparTela();
         System.out.println("====================================");

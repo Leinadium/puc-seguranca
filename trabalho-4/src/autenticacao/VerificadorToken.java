@@ -1,13 +1,14 @@
 package autenticacao;
 
 import basedados.modelos.Usuario;
+import criptografia.CriptoToken;
 
 import java.util.Scanner;
 import java.util.Date;
 public class VerificadorToken {
 
-    public static boolean verifica(Usuario usuario) {
-        byte[] semente = usuario.semente;
+    public static boolean verifica(Usuario usuario, String senhaCorreta) {
+        byte[] semente = CriptoToken.decriptaSemente(senhaCorreta, usuario.semente);
         System.out.println("Digite o token do usuário: ");
 
         Scanner scanner = new Scanner(System.in);
@@ -28,7 +29,7 @@ public class VerificadorToken {
                 GeradorToken.geraToken(semente,minutoProximo)
         };
 
-        System.out.print("Token esperado: " + tokensEsperados[0] + "\n Token esperado: " + tokensEsperados[1] + "\n Token esperado: " + tokensEsperados[2] + "\n");
+        // System.out.print("Token esperado: " + tokensEsperados[0] + "\n Token esperado: " + tokensEsperados[1] + "\n Token esperado: " + tokensEsperados[2] + "\n");
 
         for (int tokenEsperado : tokensEsperados) {
             if (tokenEsperado == tokenUsuario) {

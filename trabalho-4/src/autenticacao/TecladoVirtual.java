@@ -16,16 +16,16 @@ public class TecladoVirtual {
         }
     }
 
-    private boolean comparaSenhas(String senhaCorreta, String[] todasSenhasHash) {
-        for (String senhaHash : todasSenhasHash) {
-            if (CriptoSenha.compara(senhaCorreta, senhaHash)) {
-                return true;
+    private String comparaSenhas(String senhaCorreta, String[] todasSenhas) {
+        for (String senha : todasSenhas) {
+            if (CriptoSenha.compara(senhaCorreta, senha)) {
+                return senha;
             }
         }
-        return false;
+        return null;
     }
 
-    public boolean lerSenha(String senhaCorreta, int tentativasRestantes) {
+    public String lerSenha(String senhaCorreta, int tentativasRestantes) {
         Scanner scanner = new Scanner(System.in);
 
         for (int i = 0; i < 10; i += 1) {

@@ -36,7 +36,9 @@ public class CriptoToken {
         // inicia um prng usando a senha
         try {
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            random.setSeed(senha.getBytes());
+            if (senha != null) {
+                random.setSeed(senha.getBytes());
+            }
             KeyGenerator kg = KeyGenerator.getInstance("DES");
             // gera a chave des usando a senha
             kg.init(56, random);

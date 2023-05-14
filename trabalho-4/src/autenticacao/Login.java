@@ -49,12 +49,12 @@ public class Login {
 
         // segunda autenticacao
         registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_INICIADA);
-        boolean senhaCheck;
+        String senhaCheck = null;
         int tentativas_senha = 0;
         while (tentativas_senha < 3) {
             TecladoVirtual teclado = new TecladoVirtual();
             senhaCheck = teclado.lerSenha(usuario.senha, tentativas_senha);
-            if (senhaCheck) {
+            if (senhaCheck != null) {
                 registrador.fazerRegistro(EnumRegistro.SENHA_VERIFICADA);
                 System.out.println("Senha correta!");
                 tentativas_senha = 0;
@@ -69,7 +69,7 @@ public class Login {
             }
         }
         registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_ENCERRADA);
-        if (tentativas_senha == 3) {
+        if (tentativas_senha >= 3) {
             System.out.println("O acesso do usuário foi bloqueado.");
             conexao.bloquearUsuario(usuario);
             registrador.fazerRegistro(EnumRegistro.ACESSO_BLOQUEADO_2, usuario.loginName);
@@ -89,7 +89,7 @@ public class Login {
         boolean tokenCheck;
         int tentativas_token = 0;
         while (tentativas_token < 3) {
-            tokenCheck = VerificadorToken.verifica(usuario);
+            tokenCheck = VerificadorToken.verifica(usuario, senhaCheck);
             if (tokenCheck) {
                 registrador.fazerRegistro(EnumRegistro.TOKEN_VERIFICADO);
                 System.out.println("Token correto!");
