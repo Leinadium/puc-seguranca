@@ -129,7 +129,6 @@ public class CofreDigital {
                 String erro = "";
                 do {
                     String fraseTalvez = InterfaceTerminal.pedeFraseAdmin(erro);
-                    // tentando validar a chave
                     try {
                         this.infoAdmin.set(
                                 fraseTalvez,    // SALVANDO EM MEMORIA
@@ -177,6 +176,8 @@ public class CofreDigital {
         if (this.usuario.grupo.nome.equals("administrador")) {
             this.usuario.fraseSecreta = this.infoAdmin.getFrase();
         }
+
+        this.registrador.fazerRegistro(EnumRegistro.SESSAO_INICIADA, this.usuario.loginName);
     }
 
     private void loopSistema() {
@@ -199,7 +200,8 @@ public class CofreDigital {
                     sair = this.processarSaida();
             }
         }
-        // resetando usuario
+        // logout
+        this.registrador.fazerRegistro(EnumRegistro.SESSAO_ENCERRADA, this.usuario.loginName);
         this.usuario = null;
     }
 
@@ -324,10 +326,26 @@ public class CofreDigital {
             if (r == 0) {   // mostrar pasta
                 this.registrador.fazerRegistro(EnumRegistro.BOTAO_LISTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
 
+                PublicKey pubKeyAdmin;
+                PrivateKey privKeyAdmin;
+                try {
+                    pubKeyAdmin = this.infoAdmin.getPublicKey();
+                } catch (Exception e) {
+                    erro = "ERRO DECODIFICANDO CHAVE PUBLICA DO ADMIN";
+                    continue;
+                }
+
+                try {
+                    privKeyAdmin = this.infoAdmin.getPrivateKey();
+                } catch (Exception e) {
+                    erro = "ERRO DECODIFICANDO CHAVE PRIVADA DO ADMIN (FRASE OU CHAVE INVALIDA)";
+                    continue;
+                }
+
                 try {
                     this.diretorio.init(
-                            this.infoAdmin.getPrivateKey(),
-                            this.infoAdmin.getPublicKey(),
+                            privKeyAdmin,
+                            pubKeyAdmin,
                             this.registrador,
                             this.usuario
                     );
