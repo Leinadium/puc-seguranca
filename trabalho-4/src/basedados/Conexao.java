@@ -282,7 +282,7 @@ public class Conexao {
         setMensagem(4002, "Autenticação etapa 3 encerrada para %1$s");
         setMensagem(4003, "Token verificado positivamente para %1$s");
         setMensagem(4004, "Primeiro erro de token contabilizado para %1$s");
-        setMensagem(4005, "segundo erro de token contabilizado para %1$s");
+        setMensagem(4005, "Segundo erro de token contabilizado para %1$s");
         setMensagem(4006, "Terceiro erro de token contabilizado para %1$s");
         setMensagem(4007, "Acesso do usuario %1$s bloqueado pela autenticação etapa 3");
         setMensagem(5001, "Tela principal apresentada para %1$s");
