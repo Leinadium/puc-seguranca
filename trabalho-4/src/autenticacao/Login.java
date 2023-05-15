@@ -31,7 +31,7 @@ public class Login {
             try {
                 usuario = conexao.getUsuario(nomeLogin);
             } catch (Exception e) {
-                registrador.fazerRegistro(EnumRegistro.LOGIN_NAO_IDENTIFICADO);
+                registrador.fazerRegistro(EnumRegistro.LOGIN_NAO_IDENTIFICADO, nomeLogin);
                 erro = "Usuario não existe no banco de dados";
                 continue;
             }
@@ -48,14 +48,14 @@ public class Login {
         } while (usuario == null);
 
         // segunda autenticacao
-        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_INICIADA);
+        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_INICIADA, usuario.loginName);
         String senhaCheck = null;
         int tentativas_senha = 0;
         while (tentativas_senha < 3) {
             TecladoVirtual teclado = new TecladoVirtual();
             senhaCheck = teclado.lerSenha(usuario.senha, tentativas_senha);
             if (senhaCheck != null) {
-                registrador.fazerRegistro(EnumRegistro.SENHA_VERIFICADA);
+                registrador.fazerRegistro(EnumRegistro.SENHA_VERIFICADA, usuario.loginName);
                 System.out.println("Senha correta!");
                 tentativas_senha = 0;
                 break;
@@ -68,7 +68,7 @@ public class Login {
                 else  { registrador.fazerRegistro(EnumRegistro.SENHA_INVALIDA_3, usuario.loginName); }
             }
         }
-        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_ENCERRADA);
+        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_2_ENCERRADA, usuario.loginName);
         if (tentativas_senha >= 3) {
             System.out.println("O acesso do usuário foi bloqueado.");
             conexao.bloquearUsuario(usuario);
@@ -85,13 +85,13 @@ public class Login {
             System.exit(1);
         }
 
-        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_3_INICIADA);
+        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_3_INICIADA, usuario.loginName);
         boolean tokenCheck;
         int tentativas_token = 0;
         while (tentativas_token < 3) {
             tokenCheck = VerificadorToken.verifica(usuario, senhaCheck);
             if (tokenCheck) {
-                registrador.fazerRegistro(EnumRegistro.TOKEN_VERIFICADO);
+                registrador.fazerRegistro(EnumRegistro.TOKEN_VERIFICADO, usuario.loginName);
                 System.out.println("Token correto!");
                 tentativas_token = 0;
                 break;
@@ -106,7 +106,7 @@ public class Login {
                 System.out.println("Tentativas restantes: " + (3 - tentativas_token));
             }
         }
-        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_3_ENCERRADA);
+        registrador.fazerRegistro(EnumRegistro.AUTENTICACAO_3_ENCERRADA, usuario.loginName);
 
         if (tentativas_token == 3) {
             System.out.println("O acesso do usuário foi bloqueado.");

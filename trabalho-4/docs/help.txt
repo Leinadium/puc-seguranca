@@ -1,14 +1,14 @@
 ./trabalho-4/Pacote-T4/Files
 
 
-./trabalho-4/Pacote-T4/Keys/admin-x509.crt
+../Token/Keys/admin-x509.crt
 
-./trabalho-4/Pacote-T4/Keys/admin-pkcs8-des.key
+../Token/Keys/admin-pkcs8-des.key
 
 
-./trabalho-4/Pacote-T4/Keys/user01-x509.crt
+../Token/Keys/user04-x509.crt
 
-./trabalho-4/Pacote-T4/Keys/user01-pkcs8-des.key
+../Token/Keys/user04-pkcs8-des.key
 
 
 ./trabalho-4/Pacote-T4/Keys/user02-x509.crt

@@ -18,9 +18,6 @@ public class Usuario {
     /** a hora de bloqueio do usuario */
     public Date bloqueado;
 
-    /** frase secreta (para certificado?) */
-    public String fraseSecreta;
-
     /** senha criptografada */
     public String senha;
 
@@ -37,7 +34,6 @@ public class Usuario {
         this.uid = 0;
         this.loginName = "";
         this.nome = "";
-        this.fraseSecreta = "";
         this.bloqueado = null;
         this.senha = "";
         this.semente = null;

@@ -2,12 +2,13 @@ package terminal;
 
 import basedados.modelos.Usuario;
 import diretorio.CertificadoInfo;
-import diretorio.Diretorio;
 import diretorio.LinhaIndice;
 import registro.EnumRegistro;
 import registro.Registrador;
 
+import java.io.Console;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -26,14 +27,16 @@ public class InterfaceTerminal {
     }
 
     public static String pedeFraseAdmin(String erro) {
-        Scanner scanner = new Scanner(System.in);
+        Console console = System.console();
         limparTela();
         System.out.println("==================================");
         if (!erro.equals("")) {
             System.out.println("Erro: " + erro);
         }
-        System.out.println("Digite a frase secreta de administrador:");
-        return scanner.nextLine();
+
+        System.out.println("Digite a frase secreta do admin: ");
+        char[] fraseSecreta = console.readPassword();
+        return Arrays.toString(fraseSecreta);
     }
 
     public static Operacao menuPrincipal(Usuario usuario) {
@@ -131,6 +134,7 @@ public class InterfaceTerminal {
                 System.out.println("\n" + erro);
             }
 
+            Console console;
             switch (campoAtual) {
                 case 0:
                     System.out.println("\nDigite o caminho para o certificado digital: ");
@@ -156,6 +160,15 @@ public class InterfaceTerminal {
                     break;
                 case 2:
                     System.out.println("\nDigite a frase secreta do usuário:");
+                    console = System.console();
+                    if (console != null) {
+                        char[] kkk = console.readPassword();
+                        formularioCadastro.fraseSecreta = new String(kkk);
+                    } else {
+                        formularioCadastro.fraseSecreta = scanner.nextLine();
+                    }
+
+
                     formularioCadastro.fraseSecreta = scanner.nextLine();
                     if (formularioCadastro.senhaPessoal.length() > 255) {
                         erro = "A senha secreta não pode ter mais de 255 caracteres!";
@@ -188,7 +201,13 @@ public class InterfaceTerminal {
                     break;
                 case 4:
                     System.out.println("\nDigite a senha pessoal do usuário ou SAIR:");
-                    formularioCadastro.senhaPessoal = scanner.nextLine();
+                    console = System.console();
+                    if (console != null) {
+                        char[] senhaPessoal = console.readPassword();
+                        formularioCadastro.senhaPessoal = new String(senhaPessoal);
+                    } else {
+                        formularioCadastro.senhaPessoal = scanner.nextLine();
+                    }
                     String x = validarSenha(formularioCadastro.senhaPessoal);
                     if (x != null) {
                         erro = x;
@@ -201,7 +220,14 @@ public class InterfaceTerminal {
                     break;
                 case 5:
                     System.out.println("\nDigite a senha novamente:");
-                    String senha = scanner.nextLine();
+                    console = System.console();
+                    String senha;
+                    if (console != null) {
+                        char[] senhaPessoal = console.readPassword();
+                        senha = new String(senhaPessoal);
+                    } else {
+                        senha = scanner.nextLine();
+                    }
                     if (!Objects.equals(senha, formularioCadastro.senhaPessoal)) {
                         erro = "As senhas não conferem!";
                     } else {
@@ -241,19 +267,44 @@ public class InterfaceTerminal {
         String opcao = scanner.nextLine();
         return !opcao.equals("");
     }
-
     /** retorna -1 pra voltar, 0 para abrir o diretorio, e 1-n para a selecao de um arquivo*/
-    public static int consultarPasta(Usuario usuario, Diretorio dir, ArrayList<LinhaIndice> linhas, String erro) {
+    public static FormularioPasta consultarPasta(Usuario usuario, ArrayList<LinhaIndice> linhas, String erro, FormularioPasta formularioPasta) {
         String opcao;
         Scanner scanner = new Scanner(System.in);
         boolean show = linhas != null;
+        if (formularioPasta == null) {
+            formularioPasta = new FormularioPasta();
+            formularioPasta.caminhoPasta = "";
+            formularioPasta.fraseSecreta = "";
+        }
 
         while (true) {
             limparTela();
             mostrarCabecalho(usuario);
             System.out.println("\nTotal de acessos: " + usuario.numAcessos);
-            System.out.println("\nCaminho da pasta: " + dir.getPath());
-            System.out.println("Frase secreta: " + usuario.fraseSecreta);
+
+            System.out.println("\nCaminho do pasta: " + formularioPasta.caminhoPasta);
+            System.out.println("Frase secreta: " + formularioPasta.fraseSecreta);
+
+            if (formularioPasta.caminhoPasta.equals("")) {
+                System.out.println("\nDigite o caminho da pasta ou SAIR para voltar:");
+                formularioPasta.caminhoPasta = scanner.nextLine();
+                if (formularioPasta.caminhoPasta.equalsIgnoreCase("sair")) {
+                    formularioPasta.tipoRetorno = -1;
+                    return formularioPasta;
+                }
+                continue;
+            }
+            if (formularioPasta.fraseSecreta.equals("")) {
+                System.out.println("\nDigite a frase secreta ou SAIR para voltar:");
+                formularioPasta.fraseSecreta = scanner.nextLine();
+                if (formularioPasta.fraseSecreta.equalsIgnoreCase("sair")) {
+                    formularioPasta.tipoRetorno = -1;
+                    return formularioPasta;
+                }
+                continue;
+            }
+
 
             if (!show) {
                 if (!erro.equals("")) {
@@ -262,9 +313,11 @@ public class InterfaceTerminal {
                 System.out.println("\nPressione ENTER para mostrar o conteúdo da pasta ou SAIR para voltar");
                 opcao = scanner.nextLine().toLowerCase();
                 if (opcao.equals("sair")) {
-                    return -1;
+                    formularioPasta.tipoRetorno = -1;
+                    return formularioPasta;
                 } else if (opcao.equals("")){
-                    return 0;                   // RETURN ABRIR PASTA
+                    formularioPasta.tipoRetorno = 0;
+                    return formularioPasta;                   // RETURN ABRIR PASTA
                 }
             } else {
                 System.out.println("--- ARQUIVOS ---");
@@ -280,14 +333,16 @@ public class InterfaceTerminal {
                 System.out.println("Digite o numero do arquivo para abrir ou SAIR para voltar");
                 opcao = scanner.nextLine().toLowerCase();
                 if (opcao.equals("sair")) {
-                    return -1;                  // RETURN SAIR
+                    formularioPasta.tipoRetorno = -1;
+                    return formularioPasta;                  // RETURN SAIR
                 } else {
                     try {
                         int index = Integer.parseInt(opcao);
                         if (index <= 0 || index > linhas.size()) {
                             erro = "OPCAO INVALIDA (NUMERO FORA DO INTERVALO)";
                         } else {
-                            return index;       // RETURN INDEX
+                            formularioPasta.tipoRetorno = index;
+                            return formularioPasta;       // RETURN INDEX
                         }
                     } catch (Exception e) {
                         erro = "OPCAO INVALIDA (NAO EH UM NUMERO)";

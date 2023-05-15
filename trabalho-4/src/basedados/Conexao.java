@@ -30,7 +30,6 @@ public class Conexao {
             + "	nome TEXT NOT NULL,\n"
             + "	numAcessos INTEGER,\n"
             + "	bloqueado TEXT,\n"
-            + "	fraseSecreta TEXT NOT NULL,\n"
             + "	senha BLOB NOT NULL,\n"
             + "	semente BLOB NOT NULL,\n"
             + "	kid INTEGER NOT NULL,\n"
@@ -158,7 +157,7 @@ public class Conexao {
 
     public Usuario getUsuario(String loginName) throws Exception {
         Usuario usuario = new Usuario();
-        String sql = "SELECT uid, loginName, nome, numAcessos, bloqueado, fraseSecreta, senha, semente, kid, gid " +
+        String sql = "SELECT uid, loginName, nome, numAcessos, bloqueado, senha, semente, kid, gid " +
                      "FROM usuarios WHERE loginName = ?";
         PreparedStatement pstmt = conn.prepareStatement(sql);
         pstmt.setString(1, loginName);
@@ -175,7 +174,6 @@ public class Conexao {
             usuario.nome = rs.getString("nome");
             usuario.numAcessos = rs.getInt("numAcessos");
             usuario.bloqueado = bloqueado;
-            usuario.fraseSecreta = rs.getString("fraseSecreta");
             usuario.senha = rs.getString("senha");
             usuario.semente = rs.getBytes("semente");
             usuario.chaveiro = getChaveiro(rs.getInt("kid"));
@@ -207,7 +205,7 @@ public class Conexao {
 
         // cria o usuario
         String sql2 = "INSERT INTO usuarios (" +
-                "loginName, nome, numAcessos, bloqueado, fraseSecreta, senha, semente, kid, gid) " +
+                "loginName, nome, numAcessos, bloqueado, senha, semente, kid, gid) " +
               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         pstmt = conn.prepareStatement(sql2);
         pstmt.setString(1, usuario.loginName);
@@ -215,16 +213,10 @@ public class Conexao {
         pstmt.setInt(3, usuario.numAcessos);
         pstmt.setDate(4, (Date) usuario.bloqueado);
 
-        // se o usuario for admin, nao pode salvar a fraseSecreta
-        if (!usuario.grupo.nome.equals("administrador")) {
-            pstmt.setString(5, usuario.fraseSecreta);
-        } else {
-            pstmt.setString(5, "");
-        }
-        pstmt.setString(6, usuario.senha);
-        pstmt.setBytes(7, usuario.semente);
-        pstmt.setInt(8, usuario.chaveiro.kid);
-        pstmt.setInt(9, usuario.grupo.gid);
+        pstmt.setString(5, usuario.senha);
+        pstmt.setBytes(6, usuario.semente);
+        pstmt.setInt(7, usuario.chaveiro.kid);
+        pstmt.setInt(8, usuario.grupo.gid);
         pstmt.executeUpdate();
     }
 
@@ -271,6 +263,7 @@ public class Conexao {
         setMensagem(2002, "Autenticação etapa 1 encerrada");
         setMensagem(2003, "Login name %1$s identificado com acesso liberado");
         setMensagem(2004, "Login name %1$s identificado com acesso bloqueado");
+        setMensagem(2005, "Login name %1$s não identificado");
         setMensagem(3001, "Autenticação etapa 2 iniciada para %1$s");
         setMensagem(3002, "Autenticação etapa 2 encerrada para %1$s");
         setMensagem(3003, "Senha pessoal verificada positivamente para %1$s");

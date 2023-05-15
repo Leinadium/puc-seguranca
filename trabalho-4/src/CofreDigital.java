@@ -8,6 +8,7 @@ import basedados.Conexao;
 import registro.Registrador;
 import registro.EnumRegistro;
 import terminal.FormularioCadastro;
+import terminal.FormularioPasta;
 import terminal.InterfaceTerminal;
 import terminal.Operacao;
 import autenticacao.Login;
@@ -28,16 +29,12 @@ public class CofreDigital {
     boolean fecharSistema;
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Uso: java CofreDigital <diretorio>");
-            System.exit(1);
-        }
-        CofreDigital cofre = new CofreDigital(args[0]);
+        CofreDigital cofre = new CofreDigital();
         cofre.mainFinal();
     }
 
-    public CofreDigital(String dirPath) {
-        this.diretorio = new Diretorio(dirPath);
+    public CofreDigital() {
+        this.diretorio = null;
         this.registrador = Registrador.getInstance();
         this.usuario = null;
         this.conexao = null;
@@ -93,7 +90,6 @@ public class CofreDigital {
                 Usuario admin = new Usuario();
                 admin.loginName = certInfo.emailSujeito;
                 admin.nome = certInfo.nomeSujeito;
-                admin.fraseSecreta = form.fraseSecreta;     // o banco nao armazena a frase secreta
                 admin.senha = CriptoSenha.encripta(form.senhaPessoal);
                 admin.bloqueado = null;
                 admin.semente = CriptoToken.geraSemente(form.senhaPessoal);
@@ -173,9 +169,9 @@ public class CofreDigital {
         // se o usuario for admin, this.usuario.fraseSecreta eh nulo, pq eu nao posso salvar a frase secreta do admin
         // pelo menos foi o que eu entendi do enunciado
         // entao eu tenho que pegar do adminInfo.fraseSecreta
-        if (this.usuario.grupo.nome.equals("administrador")) {
-            this.usuario.fraseSecreta = this.infoAdmin.getFrase();
-        }
+        //        if (this.usuario.grupo.nome.equals("administrador")) {
+        //            this.usuario.fraseSecreta = this.infoAdmin.getFrase();
+        //        }
 
         this.registrador.fazerRegistro(EnumRegistro.SESSAO_INICIADA, this.usuario.loginName);
     }
@@ -263,7 +259,7 @@ public class CofreDigital {
             }
 
             usuario.nome = certInfo.nomeSujeito;
-            usuario.fraseSecreta = form.fraseSecreta;
+            String fraseSecreta = form.fraseSecreta;
             usuario.senha = CriptoSenha.encripta(form.senhaPessoal);
             usuario.bloqueado = null;
             usuario.semente = CriptoToken.geraSemente(form.senhaPessoal);
@@ -286,7 +282,7 @@ public class CofreDigital {
             try {       // PEGANDO CHAVE PRIVADA
                 privk = Restaurador.restauraChavePrivada(
                         usuario.chaveiro.chavePrivadaBytes,
-                        usuario.fraseSecreta
+                        fraseSecreta
                 );
             } catch (Exception e) {
                 this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_FRASE_INVALIDA, usuario.loginName);
@@ -318,12 +314,15 @@ public class CofreDigital {
     private void consultarPasta() {
         String erro = "";
         ArrayList<LinhaIndice> linhas = null;
-        int r = -2;
+        FormularioPasta r = new FormularioPasta();
+        r.tipoRetorno = -2;
+        r.caminhoPasta = "";
+        r.fraseSecreta = "";
 
         this.registrador.fazerRegistro(EnumRegistro.TELA_CONSULTA, this.usuario.loginName);
-        while (r != -1) {   // -1 = sair
-            r = InterfaceTerminal.consultarPasta(this.usuario, this.diretorio, linhas, erro);
-            if (r == 0) {   // mostrar pasta
+        while (r.tipoRetorno != -1) {   // -1 = sair
+            r = InterfaceTerminal.consultarPasta(this.usuario, linhas, erro, r);
+            if (r.tipoRetorno == 0) {   // mostrar pasta
                 this.registrador.fazerRegistro(EnumRegistro.BOTAO_LISTAR_CONSULTA_SELECIONADO, this.usuario.loginName);
 
                 PublicKey pubKeyAdmin;
@@ -343,6 +342,7 @@ public class CofreDigital {
                 }
 
                 try {
+                    this.diretorio = new Diretorio(r.caminhoPasta);
                     this.diretorio.init(
                             privKeyAdmin,
                             pubKeyAdmin,
@@ -351,14 +351,14 @@ public class CofreDigital {
                     );
                 } catch (Exception e) {
                     // TODOS OS REGISTROS FORAM DEVIDAMENTE FEITOS
-                    erro = "ERRO INICIALIZANDO DIRETORIO";
+                    erro = "ERRO INICIALIZANDO DIRETORIO: " + e.getMessage();
                     continue;
                 }
                 linhas = this.diretorio.getLinhasUsuario(this.usuario);
                 this.registrador.fazerRegistro(EnumRegistro.LISTA_ARQUIVOS_PRESENTE, this.usuario.loginName);
 
-            } else if (r > 0 && linhas != null) {
-                LinhaIndice linha = linhas.get(r - 1);
+            } else if (r.tipoRetorno > 0 && linhas != null) {
+                LinhaIndice linha = linhas.get(r.tipoRetorno - 1);
                 // verificando se o arquivo eh do usuario
                 this.registrador.fazerRegistro(EnumRegistro.ARQUIVO_SELECIONADO, this.usuario.loginName, linha.codigo);
 
@@ -386,13 +386,14 @@ public class CofreDigital {
                     try {
                         pk = Restaurador.restauraChavePrivada(
                                 this.usuario.chaveiro.chavePrivadaBytes,
-                                this.usuario.fraseSecreta
+                                r.fraseSecreta
                         );
                     } catch (Exception e) {
                         // NAO EXISTE MENSAGEM DE ERRO (SOMENTE POSSIVEL SE O BANCO FOI INVALIDADO)
                         // OBS: MENTIRA, TEM SIM, ELE PEDIU
+                        // OBS2: QUEM MANDOU SALVAR FRASE NO BANCO
                         this.registrador.fazerRegistro(EnumRegistro.CHAVE_PRIVADA_INVALIDA_FRASE_INVALIDA);
-                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (CHAVE INVALIDA?)";
+                        erro = "ERRO RESTAURANDO CHAVE PRIVADA (FRASE SECRETA INVALIDA)";
                         continue;
                     }
                     try {
@@ -467,8 +468,5 @@ class InfoAdmin {
     }
     public PublicKey getPublicKey() throws Exception {
         return Restaurador.getChavePublica(this.pub);
-    }
-    public String getFrase() {
-        return this.frase;
     }
 }
