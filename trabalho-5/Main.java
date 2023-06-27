@@ -13,7 +13,7 @@ public class Main {
         String criptograma = args[2];
 
         // String chave = "SKYWALKER2019";
-        // String parcial = "Star Wars: Episode";      // String parcial = "Star Wars: Episode";
+        // String parcial = "Star Wars: Episode";
         // String criptograma = "25d01feae4e4967162cb72a8940aac94970c8389ea7bed653258faa2228529f796293b38b3176cb6ec116b5b3582414e6025d7fb88b94e409c502ed180bd137acf03d04a235a89f918cfe18eabe75877b5e630bd35c13636a145444bb55bd1529bf52e5a4cd2ac35e9fdeeee306d4e41";
 
         byte[] criptogramaByte = hexStringToByteArray(criptograma);
@@ -57,6 +57,7 @@ public class Main {
                 if (resStr.startsWith(parcial)) {
                     System.out.println("res(str): " + resStr);
                     System.out.println("ivStr: " + ivStr);      // resposta final
+                    break;
                 }
             } catch (Exception ignored){ }
 
@@ -67,7 +68,7 @@ public class Main {
         }
     }
     public static byte[] hexStringToByteArray(String s) {
-        // COPIADO DO STACKOVERFLOW, ACHO QUE NAO FUNCIONA...
+        // COPIADO DO STACKOVERFLOW, TALVEZ FUNCIONE
         //        int len = s.length();
         //        byte[] data = new byte[len / 2];
         //        for (int i = 0; i < len; i += 2) {
@@ -76,17 +77,5 @@ public class Main {
         //        }
         //        return data;
         return HexFormat.of().parseHex(s);      // REQUER UM JDK MAIS NOVO ACHO
-    }
-
-    /** para debug */
-    private static String toHex(byte[] meusBytes) {
-        // converte o signature para hexadecimal
-        StringBuilder buf = new StringBuilder();
-        for (byte meusByte : meusBytes) {
-            String hex = Integer.toHexString(0x0100 + (meusByte & 0x00FF)).substring(1);
-            buf.append(hex.length() < 2 ? "0" : "").append(hex);
-        }
-        return buf.toString();
-
     }
 }
