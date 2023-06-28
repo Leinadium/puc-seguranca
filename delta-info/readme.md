@@ -1,7 +1,5 @@
 # Delta Info Task Force
 
-Codinome: Belgica
-
 Determinar o código secreto referente ao criptograma com a técnica de força bruta no prazo de 48h. 
 Deve-se implementar um programa em linguagem Java (versão 8 ou superior) 
 que receba a semente da chave criptográfica (arg[0]), o texto plano parcial (arg[1]) e 
